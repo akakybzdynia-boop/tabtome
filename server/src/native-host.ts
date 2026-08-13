@@ -7,11 +7,11 @@ import { log } from "./logger.js";
 import { readNativeMessages, writeNativeMessage } from "./native-protocol.js";
 import { errorCode, SendService } from "./send-service.js";
 import { loadConfig } from "./config.js";
-import { loadSmtpEnvironment } from "./smtp-password.js";
+import { loadSmtpEnvironment, migratePlaintextSmtpPassword } from "./smtp-password.js";
 import { SettingsStore } from "./settings-store.js";
 import { ENV_FILE, JOB_DIRECTORY, PROTECTED_SMTP_PASSWORD_FILE, SERVER_ROOT, USER_SETTINGS_FILE } from "./paths.js";
 
-const HOST_VERSION = "0.9.0";
+const HOST_VERSION = "0.9.1";
 const PROTOCOL_VERSION = 1;
 const CAPABILITIES = ["tabs", "pastedText", "pastedRichText", "emailSettings"] as const;
 const envelope = z.object({
@@ -25,16 +25,27 @@ const saveSettingsCommand = z.object({
   amazonSenderApproved: z.boolean()
 });
 
+let passwordMigrationError: Error | undefined;
+try {
+  const migration = migratePlaintextSmtpPassword(SERVER_ROOT);
+  if (migration.migrated) log("SMTP password migrated from .env to Windows DPAPI");
+  else if (migration.removedPlaintext) log("Redundant SMTP_PASS removed from .env");
+} catch (error) {
+  passwordMigrationError = error instanceof Error ? error : new Error(String(error));
+  log("SMTP password migration failed", passwordMigrationError);
+}
 loadDotenv({ path: ENV_FILE });
 const jobs = new JobStore(JOB_DIRECTORY);
 const settings = new SettingsStore(USER_SETTINGS_FILE);
 const baseEnvironment = { ...process.env };
+delete baseEnvironment.SMTP_PASS;
 let service: SendService | undefined;
 let startupError: Error | undefined;
 
 function refreshConfiguration() {
   service = undefined;
-  startupError = undefined;
+  startupError = passwordMigrationError;
+  if (startupError) return;
   try {
     const probeEnvironment = settings.apply(baseEnvironment);
     if (!probeEnvironment.SMTP_PASS && existsSync(PROTECTED_SMTP_PASSWORD_FILE)) {
@@ -87,8 +98,8 @@ async function handle(raw: unknown) {
       ok: true,
       settings: {
         ...current,
-        passwordConfigured: Boolean(baseEnvironment.SMTP_PASS) || existsSync(PROTECTED_SMTP_PASSWORD_FILE),
-        passwordProtected: existsSync(PROTECTED_SMTP_PASSWORD_FILE)
+        passwordConfigured: existsSync(PROTECTED_SMTP_PASSWORD_FILE) && !passwordMigrationError,
+        passwordProtected: existsSync(PROTECTED_SMTP_PASSWORD_FILE) && !passwordMigrationError
       }
     });
   }
@@ -102,8 +113,8 @@ async function handle(raw: unknown) {
       configOk: !startupError,
       settings: {
         ...saved,
-        passwordConfigured: Boolean(baseEnvironment.SMTP_PASS) || existsSync(PROTECTED_SMTP_PASSWORD_FILE),
-        passwordProtected: existsSync(PROTECTED_SMTP_PASSWORD_FILE)
+        passwordConfigured: existsSync(PROTECTED_SMTP_PASSWORD_FILE) && !passwordMigrationError,
+        passwordProtected: existsSync(PROTECTED_SMTP_PASSWORD_FILE) && !passwordMigrationError
       },
       error: startupError?.message
     });

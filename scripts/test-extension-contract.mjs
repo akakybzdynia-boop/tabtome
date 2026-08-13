@@ -10,7 +10,7 @@ const popupScript = readFileSync(join(dist, "popup.js"), "utf8");
 const backgroundScript = readFileSync(join(dist, "background.js"), "utf8");
 const backgroundSource = readFileSync(join(root, "extension", "src", "background.ts"), "utf8");
 
-if (manifest.version !== "0.9.0") throw new Error(`Unexpected extension version: ${manifest.version}`);
+if (manifest.version !== "0.9.1") throw new Error(`Unexpected extension version: ${manifest.version}`);
 if (!manifest.permissions?.includes("nativeMessaging")) throw new Error("nativeMessaging permission is missing.");
 if (!manifest.permissions?.includes("contextMenus")) throw new Error("contextMenus permission is missing.");
 if (manifest.permissions?.includes("clipboardRead")) throw new Error("Pasted-text mode must not request clipboardRead.");

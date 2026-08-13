@@ -3,8 +3,8 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $outputs = Join-Path $root "outputs"
 $extension = Join-Path $root "extension"
-$repro = Join-Path $root "work\source-repro-0.9.0"
-$version = "0.9.0"
+$repro = Join-Path $root "work\source-repro-0.9.1"
+$version = "0.9.1"
 
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -119,8 +119,8 @@ foreach ($name in @(".env.example", "package.json", "tsconfig.json")) {
     $fullEntries += [pscustomobject]@{ Source = (Join-Path $root "server\$name"); Destination = "server/$name" }
 }
 $fullEntries += [pscustomobject]@{ Source = (Join-Path $root "docs\PROJECT_STATUS_RU.md"); Destination = "PROJECT_STATUS_RU.md" }
-$fullEntries += [pscustomobject]@{ Source = (Join-Path $root "docs\releases\v0.9.0.md"); Destination = "RELEASE_NOTES_v0.9.0.md" }
-$fullEntries += [pscustomobject]@{ Source = (Join-Path $root "docs\releases\AMO_REVIEW_NOTES_v0.9.0.md"); Destination = "AMO_REVIEW_NOTES_v0.9.0.md" }
+$fullEntries += [pscustomobject]@{ Source = (Join-Path $root "docs\releases\v0.9.1.md"); Destination = "RELEASE_NOTES_v0.9.1.md" }
+$fullEntries += [pscustomobject]@{ Source = (Join-Path $root "docs\releases\AMO_REVIEW_NOTES_v0.9.1.md"); Destination = "AMO_REVIEW_NOTES_v0.9.1.md" }
 $fullPrimary = Join-Path $outputs "LOCAL-COMPONENT-AND-PROJECT-v$version.zip"
 New-ReleaseZip $fullPrimary $fullEntries
 

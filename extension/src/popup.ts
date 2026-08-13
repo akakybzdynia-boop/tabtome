@@ -540,7 +540,7 @@ async function init() {
     }
     serviceReady = true;
     richTextSupported = Boolean(health.capabilities?.includes("pastedRichText"));
-    show(serviceEl, `Локальный компонент работает (v${health.hostVersion || "0.9.0"})`, "ok");
+    show(serviceEl, `Локальный компонент работает (v${health.hostVersion || "0.9.1"})`, "ok");
     if (health.capabilities?.includes("emailSettings")) {
       const settings = await browser.runtime.sendMessage({ type: "native-settings-get" }) as NativeSettingsReply;
       kindleRecipient = settings.settings?.kindleEmail || "";

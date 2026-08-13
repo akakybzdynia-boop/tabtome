@@ -4,7 +4,7 @@ Status: Accepted for version 0.9.0.
 
 ## Decision
 
-The Firefox extension may edit the sender and Send to Kindle addresses, but not SMTP credentials. The native host owns `server/data/settings.json`, validates writes with Zod and applies saved addresses over `.env` fallbacks. The SMTP password remains in the DPAPI-protected `.smtp-pass` file or the legacy environment file.
+The Firefox extension may edit the sender and Send to Kindle addresses, but not SMTP credentials. The native host owns `server/data/settings.json`, validates writes with Zod and applies saved addresses over `.env` fallbacks. The 0.9.0 compatibility allowance for a password in the legacy environment file was superseded by ADR 0008 in 0.9.1; only the DPAPI-protected `.smtp-pass` file is now accepted.
 
 The extension adds one confirmation-oriented context-menu command. It records the clicked tab and optional plain-text selection in `browser.storage.session`, then opens the existing popup. The command does not start SMTP directly.
 

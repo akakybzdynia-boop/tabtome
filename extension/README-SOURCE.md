@@ -1,6 +1,6 @@
 # Source build instructions
 
-This source package corresponds to **Page to E-reader Local 0.9.0**.
+This source package corresponds to **Page to E-reader Local 0.9.1**.
 
 ## Requirements
 

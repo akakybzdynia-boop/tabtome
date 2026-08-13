@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -49,19 +49,21 @@ describe("native host process", () => {
       "SMTP_PORT=587",
       "SMTP_SECURE=false",
       "SMTP_USER=sender@example.com",
-      "SMTP_PASS=test-password",
       "SMTP_FROM=sender@example.com",
       "KINDLE_EMAIL=reader@kindle.com"
     ].join("\n"), "utf8");
+    writeFileSync(join(serverRoot, ".smtp-pass"), "lazy-dpapi-placeholder", "utf8");
     const messages = await runHost(serverRoot, { requestId: "health-test", type: "health" });
     expect(messages).toEqual([expect.objectContaining({
       requestId: "health-test",
       type: "result",
       ok: true,
-      hostVersion: "0.9.0",
+      hostVersion: "0.9.1",
       protocolVersion: 1,
       capabilities: ["tabs", "pastedText", "pastedRichText", "emailSettings"]
     })]);
+    expect(existsSync(join(serverRoot, ".smtp-pass"))).toBe(true);
+    expect(readFileSync(join(serverRoot, ".env"), "utf8")).not.toContain("SMTP_PASS");
   }, 20_000);
 
   it("reads and saves email settings even while SMTP configuration is incomplete", async () => {

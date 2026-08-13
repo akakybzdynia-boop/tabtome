@@ -1,6 +1,6 @@
 # Security model
 
-Page to E-reader Local 0.9.0 does not listen on a TCP port. Firefox starts the registered Native Messaging host and communicates over a private stdin/stdout channel. The native application manifest allows only extension ID `page-to-ereader-local@local`; ordinary web pages and unrelated extensions cannot ask Firefox to open this channel.
+Page to E-reader Local 0.9.1 does not listen on a TCP port. Firefox starts the registered Native Messaging host and communicates over a private stdin/stdout channel. The native application manifest allows only extension ID `page-to-ereader-local@local`; ordinary web pages and unrelated extensions cannot ask Firefox to open this channel.
 
 `allowed_extensions` is Firefox authorization, not authentication performed by the executable itself. Any process already running as the current Windows user can directly start `PageToEreaderHost.exe`, provide framed input over stdio, read local configuration and modify the project files. This is explicitly outside the threat model; Native Messaging prevents exposure to websites and unrelated Firefox extensions, not compromise of the Windows account.
 
@@ -13,5 +13,7 @@ Article bodies and images are held in memory while the background task and short
 Protocol stdout contains only length-prefixed JSON frames. Logs are written to files, rotate at 5 MB and redact email addresses and 64-character token-shaped strings. Logs must not receive article HTML or passwords.
 
 `server\.smtp-pass` uses Windows DPAPI. It protects an offline copy from another Windows account, but the password must be decrypted into the host process memory during SMTP authentication. Decryption is lazy: `health` and `job-status` do not launch PowerShell or expose the password; `smtp-check` and `send` decrypt it into captured child-process output. DPAPI does not protect against malicious software already running as the same Windows user.
+
+Version 0.9.1 does not accept `SMTP_PASS` from `.env` or the inherited process environment during normal operation. On Windows, a legacy assignment in `.env` is migrated before configuration is loaded: DPAPI encryption is created and round-trip checked first, then a same-directory temporary file atomically replaces `.env` without any `SMTP_PASS` assignment. If protection, verification or replacement fails, SMTP startup is blocked and the original plaintext file remains available for recovery. If an existing DPAPI password conflicts with `.env`, neither value is overwritten automatically.
 
 This design covers hostile web pages, unrelated extensions, accidental network exposure and offline access from another account. It does not protect a compromised Windows session, a malicious extension with the same signed ID, or a modified local project directory writable by the current user.

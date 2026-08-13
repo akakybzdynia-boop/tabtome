@@ -5,6 +5,8 @@ dist/
 server/logs/
 server/.token
 server/.smtp-pass
+server/.smtp-pass.*.tmp
+server/.env.*.tmp
 server/data/
 host/manifest.json
 host/PageToEreaderHost.exe

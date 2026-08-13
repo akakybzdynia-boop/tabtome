@@ -33,7 +33,7 @@ function show(message: string, ok = false) {
   result.className = ok ? "ok" : "error";
 }
 
-function setCheck(name: string, state: "ok" | "warning" | "error" | "pending", text: string) {
+function setCheck(name: string, state: "ok" | "error" | "pending", text: string) {
   const item = document.querySelector<HTMLLIElement>(`[data-check="${name}"]`)!;
   item.className = state === "pending" ? "" : state;
   const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -42,7 +42,6 @@ function setCheck(name: string, state: "ok" | "warning" | "error" | "pending", t
   icon.setAttribute("aria-hidden", "true");
   const paths = state === "ok" ? ["M3 8.5 6.2 12 13 4"]
     : state === "error" ? ["M4 4 12 12", "M12 4 4 12"]
-    : state === "warning" ? ["M8 3v6", "M8 12.5h.01"]
     : ["M3 8h10"];
   for (const data of paths) {
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -58,10 +57,9 @@ function renderChecklist(hostOk: boolean, settings?: NativeSettings) {
   setCheck("host", hostOk ? "ok" : "error", hostOk ? "Локальный компонент подключён" : "Локальный компонент недоступен");
   const addressesOk = Boolean(settings?.senderEmail && settings?.kindleEmail);
   setCheck("addresses", addressesOk ? "ok" : "error", addressesOk ? "Адреса почты указаны" : "Укажите оба адреса почты");
-  setCheck("password", settings?.passwordProtected ? "ok" : settings?.passwordConfigured ? "warning" : "error",
-    settings?.passwordProtected ? "Пароль приложения защищён Windows"
-      : settings?.passwordConfigured ? "Пароль настроен, но хранится в .env"
-      : "Пароль приложения не настроен");
+  setCheck("password", settings?.passwordProtected ? "ok" : "error", settings?.passwordProtected
+    ? "Пароль приложения защищён Windows"
+    : "Пароль приложения не настроен");
   setCheck("amazon", settings?.amazonSenderApproved ? "ok" : "error", settings?.amazonSenderApproved
     ? "Адрес отправителя разрешён в Amazon"
     : "Подтвердите разрешение адреса в Amazon");
@@ -79,7 +77,7 @@ async function init() {
   renderChecklist(false);
   try {
     const data = await browser.runtime.sendMessage({ type: "native-settings-get" }) as NativeReply;
-    if (!data?.ok || !data.settings) throw new Error(data?.error || "Локальный компонент не поддерживает настройки адресов. Обновите его до версии 0.9.0.");
+    if (!data?.ok || !data.settings) throw new Error(data?.error || "Локальный компонент не поддерживает настройки адресов. Обновите его до версии 0.9.1.");
     hostAvailable = true;
     currentSettings = data.settings;
     senderEmail.value = data.settings.senderEmail;
@@ -123,7 +121,7 @@ save.addEventListener("click", async () => {
       throw new Error(diagnostic?.error || "SMTP-проверка завершилась ошибкой.");
     }
     setCheck("smtp", "ok", "SMTP-соединение работает");
-    show(`Настройки сохранены. Локальный компонент v${diagnostic.hostVersion || "0.9.0"} и SMTP работают.`, true);
+    show(`Настройки сохранены. Локальный компонент v${diagnostic.hostVersion || "0.9.1"} и SMTP работают.`, true);
   } catch (error) {
     renderChecklist(hostAvailable, currentSettings);
     setCheck("smtp", "error", "SMTP-проверка не пройдена");
