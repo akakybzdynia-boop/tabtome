@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+*.xpi
+server/logs/
+server/.token
+server/.smtp-pass
+server/data/
+host/manifest.json
+host/PageToEreaderHost.exe
+host/node-path.txt
+outputs/
+work/
+*.zip
+.impeccable/

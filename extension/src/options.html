@@ -1,0 +1,5 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Настройки Page to E-reader Local</title><link rel="stylesheet" href="options.css"></head>
+<body><main><h1>Настройки локального компонента</h1><p>Расширение подключается к установленному компоненту напрямую. Порт, фоновый сервер и токен больше не нужны.</p><label class="check"><input id="grayscale" type="checkbox">Преобразовывать изображения в оттенки серого для Paperwhite</label><div class="buttons"><button id="save">Сохранить и проверить</button><button id="load-test" class="secondary">Проверить канал 20 МБ</button></div><p id="result" role="status"></p><p class="note">Обычная проверка подтверждает регистрацию компонента и соединение с SMTP. Отдельный тест один раз передаёт 20 МБ через настоящий канал Firefox и ничего не отправляет на Kindle. Оттенки серого уменьшают размер книги; отключите их для цветного экрана.</p></main><script src="options.js"></script></body>
+</html>

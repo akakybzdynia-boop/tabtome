@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Page to E-reader Local</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <div class="heading">
+      <h1>На Kindle</h1>
+      <button id="settings" type="button" class="link">Настройки</button>
+    </div>
+    <p id="server" class="status">Проверяю локальный компонент…</p>
+
+    <div class="mode-switch" role="tablist" aria-label="Что отправить">
+      <button id="mode-tabs" type="button" class="mode active" role="tab" aria-selected="true" aria-controls="tabs-panel" tabindex="0">Вкладки</button>
+      <button id="mode-text" type="button" class="mode" role="tab" aria-selected="false" aria-controls="text-panel" tabindex="-1">Текст</button>
+    </div>
+
+    <form id="form">
+      <section id="tabs-panel" role="tabpanel" aria-labelledby="mode-tabs">
+        <div class="actions">
+          <button id="all" type="button" class="link">Выбрать все</button>
+          <button id="none" type="button" class="link">Снять выбор</button>
+        </div>
+        <div id="tabs" class="tabs"></div>
+      </section>
+
+      <section id="text-panel" role="tabpanel" aria-labelledby="mode-text" hidden>
+        <div class="text-field">
+          <div id="pasted-content-label">Текст</div>
+          <div
+            id="pasted-content"
+            class="rich-editor"
+            contenteditable="true"
+            role="textbox"
+            aria-labelledby="pasted-content-label"
+            aria-multiline="true"
+            data-placeholder="Вставьте текст или изображение через Ctrl+V"
+          ></div>
+        </div>
+        <div class="text-meta">
+          <span><span id="text-count">0</span> / 1 000 000 символов</span>
+          <span>изображений: <span id="pasted-image-count">0</span> / 30</span>
+        </div>
+        <p class="hint">Сохраняются абзацы, заголовки, списки, ссылки, таблицы и изображения. Цвета, шрифты и стили страницы удаляются. Содержимое не записывается в историю расширения.</p>
+      </section>
+
+      <label class="book-title">
+        Название книги
+        <input id="title" placeholder="Необязательно" maxlength="200">
+      </label>
+      <button id="send" type="submit">Отправить выбранное</button>
+    </form>
+    <p id="result" class="result" role="status"></p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "firefox-to-kindle",
+  "private": true,
+  "workspaces": [
+    "server",
+    "extension"
+  ],
+  "scripts": {
+    "build": "npm run build -w server && npm run build -w extension && powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\build-native-launcher.ps1",
+    "test": "npm run build && npm run test -w server && npm run typecheck -w extension && node scripts/test-extension-contract.mjs && node scripts/test-native-launcher.mjs",
+    "diagnose": "npm run diagnose -w server",
+    "test:firefox-ui": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\test-firefox-popup.ps1"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "ws": "^8.21.3"
+  }
+}
