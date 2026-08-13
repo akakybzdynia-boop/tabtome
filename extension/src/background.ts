@@ -18,6 +18,7 @@ type EmbeddedImage = { id: string; mediaType: string; data: string };
 type RawPastedImage = { id: string; mediaType: string; data: string };
 type ExtractedArticle = { title: string; imageSources?: ImageSource[]; images?: EmbeddedImage[]; [key: string]: unknown };
 type PreparedTextArticle = { kind: "text"; title: string; text?: string; content: string; lang: string; images?: EmbeddedImage[] };
+type TabResult = { tabId: number; title: string; status: "pending" | "success" | "error"; message?: string };
 type JobState = {
   status: "preparing" | "sending" | "success" | "error" | "interrupted";
   message: string;
@@ -25,11 +26,13 @@ type JobState = {
   retryJobId?: string;
   source?: "tabs" | "text";
   tabIds?: number[];
+  tabResults?: TabResult[];
+  withoutImages?: boolean;
   title?: string;
   startedAt: number;
   finishedAt?: number;
 };
-type StartTabsMessage = { type: "start-send"; jobId: string; tabIds: number[]; title?: string };
+type StartTabsMessage = { type: "start-send"; jobId: string; tabIds: number[]; title?: string; withoutImages?: boolean };
 type StartTextMessage = {
   type: "start-text-send";
   jobId: string;
@@ -38,10 +41,24 @@ type StartTextMessage = {
   imageSources?: ImageSource[];
   images?: RawPastedImage[];
   title?: string;
+  withoutImages?: boolean;
 };
 type StartMessage = StartTabsMessage | StartTextMessage;
 type RefreshMessage = { type: "refresh-job" };
 type DiagnosticsMessage = { type: "native-health" | "native-diagnostics" | "native-load-test" };
+type SettingsMessage = {
+  type: "native-settings-get" | "native-settings-save";
+  senderEmail?: string;
+  kindleEmail?: string;
+  amazonSenderApproved?: boolean;
+};
+type NativeSettings = {
+  senderEmail: string;
+  kindleEmail: string;
+  amazonSenderApproved: boolean;
+  passwordConfigured: boolean;
+  passwordProtected: boolean;
+};
 type NativeReply = {
   requestId?: string;
   type?: "progress" | "result" | "error";
@@ -57,6 +74,7 @@ type NativeReply = {
   title?: string;
   articleCount?: number;
   imageCount?: number;
+  settings?: NativeSettings;
   entry?: {
     status?: NativeReply["status"];
     error?: string;
@@ -348,12 +366,19 @@ async function runJob(message: StartMessage) {
     source: isText ? "text" as const : "tabs" as const,
     ...(!isText ? { tabIds: message.tabIds } : {}),
     title: message.title,
+    withoutImages: Boolean(message.withoutImages),
     startedAt
   };
+  const tabResults: TabResult[] = isText ? [] : message.tabIds.map((tabId, index) => ({
+    tabId,
+    title: `Вкладка ${index + 1}`,
+    status: "pending"
+  }));
   const heartbeat = setInterval(() => {
     void browser.storage.local.set({ sendJobHeartbeat: Date.now() });
   }, 20_000);
-  const update = async (text: string) => setJob({ ...baseJob, status: "preparing", message: text });
+  const jobDetails = () => tabResults.length ? { tabResults: tabResults.map(result => ({ ...result })) } : {};
+  const update = async (text: string) => setJob({ ...baseJob, ...jobDetails(), status: "preparing", message: text });
   await update("Проверяю локальный компонент…");
   await setBadge("…", "#1769aa");
 
@@ -373,55 +398,86 @@ async function runJob(message: StartMessage) {
       const text = message.text.replace(/\r\n?/g, "\n").trim();
       if (text.length > MAX_PASTED_TEXT_CHARS) throw new Error("Текст превышает лимит 1 000 000 символов.");
       if (!message.content.trim() || message.content.length > 5_000_000) throw new Error("Форматированный текст пуст или превышает допустимый размер.");
-      await update("Подготавливаю форматирование и изображения…");
+      await update(message.withoutImages ? "Подготавливаю форматирование…" : "Подготавливаю форматирование и изображения…");
       const articleTitle = message.title?.trim() || `Текст — ${new Date().toLocaleString("ru-RU")}`;
-      const pastedImages = await normalizePastedImages(message.images || [], imageBytes, grayscale);
+      const pastedImages = message.withoutImages
+        ? { images: [] as EmbeddedImage[], skipped: 0 }
+        : await normalizePastedImages(message.images || [], imageBytes, grayscale);
       const article: PreparedTextArticle & ExtractedArticle = {
         kind: "text",
         title: articleTitle,
         ...(text ? { text } : {}),
         content: message.content,
         lang: browser.i18n.getUILanguage() || "ru",
-        imageSources: (message.imageSources || []).slice(0, MAX_IMAGES_PER_ARTICLE),
+        imageSources: message.withoutImages ? [] : (message.imageSources || []).slice(0, MAX_IMAGES_PER_ARTICLE),
         images: pastedImages.images
       };
-      const remoteImages = await downloadImages(article, imageBytes, grayscale, "paste");
+      const remoteImages = message.withoutImages
+        ? { requested: 0, skipped: 0 }
+        : await downloadImages(article, imageBytes, grayscale, "paste");
+      if (message.withoutImages) {
+        delete article.imageSources;
+        article.images = [];
+      }
       const skippedImages = pastedImages.skipped + remoteImages.skipped;
       if (skippedImages) throw new Error(`Не удалось безопасно подготовить изображений: ${skippedImages}. Удалите их из текста или повторите отправку.`);
-      if (!text && !article.images?.length) throw new Error("Вставьте текст или изображение для отправки.");
+      if (!text && !article.images?.length) throw new Error(message.withoutImages
+        ? "После исключения изображений в книге не осталось текста."
+        : "Вставьте текст или изображение для отправки.");
       articles.push(article);
     } else {
       for (let index = 0; index < message.tabIds.length; index++) {
         const tabId = message.tabIds[index];
+        const tabResult = tabResults[index];
         await update(`Извлекаю статью ${index + 1} из ${message.tabIds.length}…`);
         try {
-          const article = await extractArticle(tabId);
-          await update(`Загружаю изображения ${index + 1} из ${message.tabIds.length}…`);
-          await downloadImages(article, imageBytes, grayscale);
-          articles.push(article);
-        } catch (error) {
           const tab = await browser.tabs.get(tabId);
-          throw new Error(`${tab.title || tab.url}: ${error instanceof Error ? error.message : String(error)}`);
+          tabResult.title = tab.title || tab.url || tabResult.title;
+          const article = await extractArticle(tabId);
+          if (message.withoutImages) {
+            delete article.imageSources;
+            article.images = [];
+          } else {
+            await update(`Загружаю изображения ${index + 1} из ${message.tabIds.length}…`);
+            await downloadImages(article, imageBytes, grayscale);
+          }
+          articles.push(article);
+          tabResult.status = "success";
+          await update(`Подготовлено: ${articles.length} из ${message.tabIds.length}…`);
+        } catch (error) {
+          tabResult.status = "error";
+          tabResult.message = error instanceof Error ? error.message : String(error);
+          try {
+            const tab = await browser.tabs.get(tabId);
+            tabResult.title = tab.title || tab.url || tabResult.title;
+          } catch { /* The tab may have been closed while the job was running. */ }
+          await update(`Пропущена вкладка ${index + 1}; продолжаю подготовку…`);
         }
+      }
+      if (!articles.length) {
+        throw new Error(`Не удалось подготовить ни одной вкладки. ${tabResults.map(item => `${item.title}: ${item.message || "неизвестная ошибка"}`).join("; ")}`);
       }
     }
 
-    const sendingJob: JobState = { ...baseJob, status: "sending", message: "Запускаю локальный компонент…" };
+    const sendingJob: JobState = { ...baseJob, ...jobDetails(), status: "sending", message: "Запускаю локальный компонент…" };
     await setJob(sendingJob);
     await scheduleRecovery();
     let data: NativeReply;
+    let progressWrite = Promise.resolve();
     try {
       data = await nativeRequest(
         { type: "send", jobId: message.jobId, title: message.title || undefined, articles },
         progress => {
           const text = progress.message || (progress.status === "sending" ? "Отправляю через SMTP…" : "Собираю EPUB…");
-          void setJob({ ...baseJob, status: "sending", message: text });
+          progressWrite = progressWrite.then(() => setJob({ ...baseJob, ...jobDetails(), status: "sending", message: text }));
         }
       );
+      await progressWrite;
     } catch (error) {
+      await progressWrite.catch(() => undefined);
       if (error instanceof NativeRequestError && error.code === "JOB_INTERRUPTED") {
         await clearRecovery();
-        await setJob({ ...baseJob, status: "interrupted", message: error.message, finishedAt: Date.now() });
+        await setJob({ ...baseJob, ...jobDetails(), status: "interrupted", message: error.message, finishedAt: Date.now() });
         await setBadge("?", "#9a6700");
         return { ok: false, error: error.message };
       }
@@ -433,14 +489,15 @@ async function runJob(message: StartMessage) {
     }
 
     await clearRecovery();
-    const result = resultMessage({ title: data.title, articleCount: data.articleCount, imageCount: data.imageCount });
-    await setJob({ ...baseJob, status: "success", message: result, finishedAt: Date.now() });
+    const failedTabs = tabResults.filter(item => item.status === "error").length;
+    const result = `${resultMessage({ title: data.title, articleCount: data.articleCount, imageCount: data.imageCount })}${failedTabs ? ` Пропущено вкладок: ${failedTabs}.` : ""}`;
+    await setJob({ ...baseJob, ...jobDetails(), status: "success", message: result, finishedAt: Date.now() });
     await setBadge("✓", "#157347");
     return { ok: true };
   } catch (error) {
     const messageText = error instanceof Error ? error.message : String(error);
     await clearRecovery();
-    await setJob({ ...baseJob, status: "error", message: messageText, retryJobId: message.jobId, finishedAt: Date.now() });
+    await setJob({ ...baseJob, ...jobDetails(), status: "error", message: messageText, retryJobId: message.jobId, finishedAt: Date.now() });
     await setBadge("!", "#b42318");
     return { ok: false, error: messageText };
   } finally {
@@ -495,6 +552,26 @@ browser.runtime.onMessage.addListener((message: unknown) => {
       error: error instanceof Error ? error.message : String(error)
     }));
   }
+  const settingsMessage = message as SettingsMessage;
+  if (settingsMessage.type === "native-settings-get") {
+    return nativeRequest({ type: "settings-get" }, undefined, 15_000).catch(error => ({
+      ok: false,
+      code: error instanceof NativeRequestError ? error.code : "NATIVE_ERROR",
+      error: error instanceof Error ? error.message : String(error)
+    }));
+  }
+  if (settingsMessage.type === "native-settings-save") {
+    return nativeRequest({
+      type: "settings-save",
+      senderEmail: settingsMessage.senderEmail,
+      kindleEmail: settingsMessage.kindleEmail,
+      amazonSenderApproved: settingsMessage.amazonSenderApproved
+    }, undefined, 15_000).catch(error => ({
+      ok: false,
+      code: error instanceof NativeRequestError ? error.code : "NATIVE_ERROR",
+      error: error instanceof Error ? error.message : String(error)
+    }));
+  }
   if ((message as RefreshMessage).type === "refresh-job") {
     return resumePendingJob().then(async () => (await browser.storage.local.get("sendJob")).sendJob);
   }
@@ -507,7 +584,12 @@ browser.runtime.onMessage.addListener((message: unknown) => {
     }
     const task = runJob(startMessage);
     activeRun = task;
-    void task.finally(() => { if (activeRun === task) activeRun = undefined; });
+    void task.then(result => {
+      if (startMessage.type === "start-text-send" && result.ok) {
+        const session = (browser.storage as unknown as { session: SessionStorage }).session;
+        void session.remove("textDraft");
+      }
+    }).finally(() => { if (activeRun === task) activeRun = undefined; });
     return task;
   })();
 });
@@ -516,5 +598,43 @@ browser.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === RECOVERY_ALARM) void resumePendingJob();
 });
 browser.runtime.onStartup.addListener(() => { void resumePendingJob(); });
+
+const CONTEXT_MENU_ID = "send-to-kindle";
+type SessionStorage = {
+  set(items: Record<string, unknown>): Promise<void>;
+  remove(keys: string | string[]): Promise<void>;
+};
+
+function installContextMenu() {
+  return browser.contextMenus.remove(CONTEXT_MENU_ID).catch(() => undefined).then(() => {
+    browser.contextMenus.create({
+      id: CONTEXT_MENU_ID,
+      title: "Отправить на Киндл",
+      contexts: ["page", "selection"],
+      documentUrlPatterns: ["http://*/*", "https://*/*"]
+    });
+  });
+}
+
+browser.runtime.onInstalled.addListener(() => { void installContextMenu(); });
+browser.runtime.onStartup.addListener(() => { void installContextMenu(); });
+browser.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId !== CONTEXT_MENU_ID || !tab?.id) return;
+  const session = (browser.storage as unknown as { session: SessionStorage }).session;
+  const request = {
+    tabId: tab.id,
+    title: tab.title || "",
+    selectionText: typeof info.selectionText === "string" ? info.selectionText.slice(0, MAX_PASTED_TEXT_CHARS) : "",
+    createdAt: Date.now()
+  };
+  void session.set({ contextRequest: request }).then(() => {
+    const action = browser.action as typeof browser.action & { openPopup(): Promise<void> };
+    return action.openPopup();
+  }).catch(error => {
+    void setBadge("!", "#b42318");
+    console.error("Could not open send popup", error);
+  });
+});
+
 void resumePendingJob();
 void browser.storage.local.remove("apiToken");

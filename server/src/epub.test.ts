@@ -72,4 +72,19 @@ describe("createEpub", () => {
     expect(page).not.toContain("class=\"source\"");
     expect(result.imageCount).toBe(1);
   });
+
+  it("removes image elements when the client intentionally sends no image resources", async () => {
+    const result = await createEpub([{
+      kind: "text",
+      title: "Без изображений",
+      lang: "ru",
+      content: '<h2>Раздел</h2><p>Текст остаётся.</p><img data-kindle-image-id="missing-1" alt="Пропущено">',
+      images: []
+    }]);
+    const zip = await JSZip.loadAsync(result.buffer);
+    const page = await zip.file("OEBPS/article-1.xhtml")!.async("string");
+    expect(page).toContain("Текст остаётся.");
+    expect(page).not.toContain("<img");
+    expect(result.imageCount).toBe(0);
+  });
 });

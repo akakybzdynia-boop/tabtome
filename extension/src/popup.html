@@ -20,11 +20,16 @@
     </div>
 
     <form id="form">
+      <label class="without-images"><input id="without-images" type="checkbox">Без изображений</label>
       <section id="tabs-panel" role="tabpanel" aria-labelledby="mode-tabs">
-        <div class="actions">
-          <button id="all" type="button" class="link">Выбрать все</button>
-          <button id="none" type="button" class="link">Снять выбор</button>
+        <div class="tabs-toolbar">
+          <div class="actions">
+            <button id="all" type="button" class="link">Выбрать все</button>
+            <button id="none" type="button" class="link">Снять выбор</button>
+          </div>
+          <span id="selected-count" class="selection-count">Выбрано: 0</span>
         </div>
+        <input id="tab-search" class="tab-search" type="search" placeholder="Найти вкладку" aria-label="Найти вкладку" hidden>
         <div id="tabs" class="tabs"></div>
       </section>
 
@@ -45,16 +50,21 @@
           <span><span id="text-count">0</span> / 1 000 000 символов</span>
           <span>изображений: <span id="pasted-image-count">0</span> / 30</span>
         </div>
-        <p class="hint">Сохраняются абзацы, заголовки, списки, ссылки, таблицы и изображения. Цвета, шрифты и стили страницы удаляются. Содержимое не записывается в историю расширения.</p>
+        <p class="hint">Сохраняются абзацы, заголовки, списки, ссылки, таблицы и изображения. Цвета, шрифты и стили страницы удаляются. Незавершённый текст временно хранится в памяти Firefox до закрытия браузера.</p>
       </section>
 
       <label class="book-title">
         Название книги
         <input id="title" placeholder="Необязательно" maxlength="200">
       </label>
+      <p id="send-summary" class="send-summary"></p>
       <button id="send" type="submit">Отправить выбранное</button>
     </form>
     <p id="result" class="result" role="status"></p>
+    <details id="job-details" class="job-details" hidden>
+      <summary id="job-summary"></summary>
+      <ul id="job-tabs"></ul>
+    </details>
   </main>
   <script src="popup.js"></script>
 </body>

@@ -1,5 +1,48 @@
 <!doctype html>
 <html lang="ru">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Настройки Page to E-reader Local</title><link rel="stylesheet" href="options.css"></head>
-<body><main><h1>Настройки локального компонента</h1><p>Расширение подключается к установленному компоненту напрямую. Порт, фоновый сервер и токен больше не нужны.</p><label class="check"><input id="grayscale" type="checkbox">Преобразовывать изображения в оттенки серого для Paperwhite</label><div class="buttons"><button id="save">Сохранить и проверить</button><button id="load-test" class="secondary">Проверить канал 20 МБ</button></div><p id="result" role="status"></p><p class="note">Обычная проверка подтверждает регистрацию компонента и соединение с SMTP. Отдельный тест один раз передаёт 20 МБ через настоящий канал Firefox и ничего не отправляет на Kindle. Оттенки серого уменьшают размер книги; отключите их для цветного экрана.</p></main><script src="options.js"></script></body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Настройки Page to E-reader Local</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <h1>Настройки отправки</h1>
+    <p class="intro">Адреса хранятся только в локальном компоненте на этом компьютере. Пароль почты расширению недоступен.</p>
+
+    <section aria-labelledby="addresses-heading">
+      <h2 id="addresses-heading">Почта</h2>
+      <label for="sender-email">Адрес отправителя</label>
+      <input id="sender-email" type="email" autocomplete="email" placeholder="name@gmail.com" required>
+      <label for="kindle-email">Адрес Send to Kindle</label>
+      <input id="kindle-email" type="email" autocomplete="off" placeholder="name@kindle.com" required>
+      <label class="check"><input id="amazon-approved" type="checkbox">Адрес отправителя добавлен в список разрешённых адресов Amazon</label>
+    </section>
+
+    <section aria-labelledby="book-heading">
+      <h2 id="book-heading">Книга</h2>
+      <label class="check"><input id="grayscale" type="checkbox">Преобразовывать изображения в оттенки серого для Paperwhite</label>
+    </section>
+
+    <section aria-labelledby="setup-heading">
+      <h2 id="setup-heading">Готовность</h2>
+      <ul id="checklist" class="checklist" aria-live="polite">
+        <li data-check="host">Локальный компонент</li>
+        <li data-check="addresses">Адреса почты</li>
+        <li data-check="password">Пароль приложения</li>
+        <li data-check="amazon">Разрешение Amazon</li>
+        <li data-check="smtp">SMTP</li>
+      </ul>
+    </section>
+
+    <div class="buttons">
+      <button id="save">Сохранить и проверить SMTP</button>
+      <button id="load-test" class="secondary">Проверить канал 20 МБ</button>
+    </div>
+    <p id="result" role="status" aria-live="polite"></p>
+    <p class="note">Если пароль приложения не настроен, запустите <code>protect-smtp-password.ps1</code> из папки проекта. Тест 20 МБ проверяет связь Firefox с локальным компонентом и ничего не отправляет на Kindle.</p>
+  </main>
+  <script src="options.js"></script>
+</body>
 </html>

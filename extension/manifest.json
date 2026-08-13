@@ -1,13 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Page to E-reader Local",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Отправляет открытые страницы и форматированный текст с изображениями на электронную книгу через локальный компонент.",
   "icons": {
     "48": "icons/icon-48.png",
     "96": "icons/icon-96.png"
   },
-  "permissions": ["tabs", "scripting", "storage", "alarms", "nativeMessaging"],
+  "permissions": ["tabs", "scripting", "storage", "alarms", "nativeMessaging", "contextMenus"],
   "host_permissions": ["<all_urls>"],
   "action": {
     "default_title": "Отправить на электронную книгу",

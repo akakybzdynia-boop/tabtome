@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = $PSScriptRoot
 $resolvedArchive = (Resolve-Path -LiteralPath $ArchivePath).Path
 $backupDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("page-to-ereader-secrets-" + [guid]::NewGuid().ToString("N"))
-$protectedFiles = @("server\.env", "server\.smtp-pass")
+$protectedFiles = @("server\.env", "server\.smtp-pass", "server\data\settings.json")
 $obsoleteFiles = @(
     "server\src\app.ts",
     "server\src\app.test.ts",

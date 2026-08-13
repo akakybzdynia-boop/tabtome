@@ -9,5 +9,6 @@ export const SERVER_ROOT = process.env.PAGE_TO_EREADER_SERVER_ROOT
 
 export const ENV_FILE = resolve(SERVER_ROOT, ".env");
 export const PROTECTED_SMTP_PASSWORD_FILE = resolve(SERVER_ROOT, ".smtp-pass");
+export const USER_SETTINGS_FILE = resolve(SERVER_ROOT, "data", "settings.json");
 export const JOB_DIRECTORY = resolve(SERVER_ROOT, "data", "jobs");
 export const LOG_DIRECTORY = resolve(SERVER_ROOT, "logs");

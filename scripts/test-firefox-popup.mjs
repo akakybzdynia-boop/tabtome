@@ -36,9 +36,20 @@ await new Promise((resolve, reject) => {
 const address = server.address();
 if (!address || typeof address === "string") throw new Error("Could not start local test server.");
 
+const remotePort = await new Promise((resolve, reject) => {
+  const probe = createServer();
+  probe.once("error", reject);
+  probe.listen(0, "127.0.0.1", () => {
+    const probeAddress = probe.address();
+    if (!probeAddress || typeof probeAddress === "string") return reject(new Error("Could not reserve a Firefox remote port."));
+    const port = probeAddress.port;
+    probe.close(error => error ? reject(error) : resolve(port));
+  });
+});
+
 const firefox = spawn(firefoxPath, [
   "--headless", "--no-remote", "--profile", profilePath,
-  "--remote-debugging-port", "0", "--remote-allow-system-access"
+  "--remote-debugging-port", String(remotePort), "--remote-allow-system-access"
 ], { stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
 
 let browserOutput = "";

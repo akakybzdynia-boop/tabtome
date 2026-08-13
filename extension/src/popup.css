@@ -1,6 +1,6 @@
 :root { font: 14px system-ui, sans-serif; color: #202124; background: #fff; }
-body { margin: 0; width: 380px; max-height: 600px; }
-main { padding: 16px; }
+body { margin: 0; width: 380px; max-height: 720px; overflow: hidden; }
+main { box-sizing: border-box; width: 100%; padding: 16px; }
 .heading { display: flex; align-items: center; justify-content: space-between; }
 h1 { font-size: 20px; margin: 0; }
 .status, .result { margin: 8px 0; }
@@ -12,9 +12,14 @@ h1 { font-size: 20px; margin: 0; }
 .mode { border: 0; padding: 8px; background: #f3f4f6; color: #333; cursor: pointer; }
 .mode + .mode { border-left: 1px solid #b8bec5; }
 .mode.active { background: #1769aa; color: #fff; font-weight: 600; }
-.actions { display: flex; gap: 12px; margin: 10px 0; }
-.tabs { max-height: 260px; overflow: auto; border-block: 1px solid #ddd; }
-.tab { display: flex; align-items: center; justify-content: flex-start; gap: 9px; padding: 9px 2px; border-bottom: 1px solid #eee; cursor: pointer; }
+.without-images { display: flex; align-items: center; gap: 8px; width: max-content; margin: 2px 0 10px; }
+.without-images input { width: 16px; height: 16px; margin: 0; }
+.tabs-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0 8px; }
+.actions { display: flex; gap: 12px; }
+.selection-count { color: #5f6368; font-size: 12px; white-space: nowrap; }
+.tab-search { margin: 0 0 8px; }
+.tabs { direction: ltr; max-height: 420px; overflow: auto; border-block: 1px solid #ddd; }
+.tab { box-sizing: border-box; display: flex; align-items: center; justify-content: flex-start; gap: 9px; width: 100%; padding: 9px 2px; border-bottom: 1px solid #eee; cursor: pointer; }
 .tab input[type="checkbox"] { flex: 0 0 auto; width: 16px; height: 16px; margin: 0; }
 .tab span { flex: 1 1 auto; min-width: 0; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
 .book-title, .text-field { display: grid; gap: 5px; margin: 12px 0; }
@@ -32,6 +37,12 @@ input:not([type="checkbox"]), .rich-editor { box-sizing: border-box; width: 100%
 .rich-editor th, .rich-editor td { padding: 4px; border: 1px solid #b8bec5; }
 .text-meta { display: flex; justify-content: space-between; gap: 12px; color: #5f6368; font-size: 12px; }
 .hint { margin: 6px 0 12px; color: #5f6368; font-size: 12px; line-height: 1.35; }
+.send-summary { min-height: 17px; margin: -4px 0 8px; color: #5f6368; font-size: 12px; line-height: 1.35; }
 #send { width: 100%; padding: 10px; border: 0; border-radius: 6px; background: #1769aa; color: #fff; font-weight: 600; cursor: pointer; }
+.job-details { margin-top: 10px; color: #3c4043; font-size: 12px; }
+.job-details summary { cursor: pointer; font-weight: 600; }
+.job-details ul { display: grid; gap: 6px; max-height: 150px; margin: 8px 0 0; padding: 0 0 0 18px; overflow: auto; }
+.job-details li.error { color: #b42318; }
+.job-details li.success { color: #157347; }
 button:disabled { opacity: .55; cursor: not-allowed; }
 [hidden] { display: none !important; }

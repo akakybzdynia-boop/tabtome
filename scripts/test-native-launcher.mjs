@@ -30,7 +30,7 @@ if (output.length < 4) throw new Error("Native launcher returned no protocol fra
 const length = output.readUInt32LE(0);
 if (output.length !== length + 4) throw new Error("Native launcher polluted or truncated protocol stdout.");
 const response = JSON.parse(output.subarray(4).toString("utf8"));
-if (response.requestId !== "launcher-test" || response.hostVersion !== "0.8.0" || response.protocolVersion !== 1 || !response.capabilities?.includes("pastedRichText")) {
+if (response.requestId !== "launcher-test" || response.hostVersion !== "0.9.0" || response.protocolVersion !== 1 || !response.capabilities?.includes("pastedRichText") || !response.capabilities?.includes("emailSettings")) {
   throw new Error(`Unexpected native launcher response: ${JSON.stringify(response)}`);
 }
 process.stdout.write("Windowless native launcher and protocol forwarding: OK\n");

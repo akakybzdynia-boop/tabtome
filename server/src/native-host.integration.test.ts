@@ -58,9 +58,41 @@ describe("native host process", () => {
       requestId: "health-test",
       type: "result",
       ok: true,
-      hostVersion: "0.8.0",
+      hostVersion: "0.9.0",
       protocolVersion: 1,
-      capabilities: ["tabs", "pastedText", "pastedRichText"]
+      capabilities: ["tabs", "pastedText", "pastedRichText", "emailSettings"]
+    })]);
+  }, 20_000);
+
+  it("reads and saves email settings even while SMTP configuration is incomplete", async () => {
+    const serverRoot = makeRoot();
+    const initial = await runHost(serverRoot, { requestId: "settings-initial", type: "settings-get" });
+    expect(initial).toEqual([expect.objectContaining({
+      requestId: "settings-initial",
+      type: "result",
+      ok: true,
+      settings: expect.objectContaining({ senderEmail: "", kindleEmail: "", passwordConfigured: false })
+    })]);
+
+    const saved = await runHost(serverRoot, {
+      requestId: "settings-save",
+      type: "settings-save",
+      senderEmail: "sender@example.com",
+      kindleEmail: "reader@kindle.com",
+      amazonSenderApproved: true
+    });
+    expect(saved).toEqual([expect.objectContaining({
+      requestId: "settings-save",
+      type: "result",
+      ok: true,
+      configOk: false,
+      settings: expect.objectContaining({ senderEmail: "sender@example.com", kindleEmail: "reader@kindle.com" })
+    })]);
+
+    const current = await runHost(serverRoot, { requestId: "settings-current", type: "settings-get" });
+    expect(current).toEqual([expect.objectContaining({
+      requestId: "settings-current",
+      settings: expect.objectContaining({ senderEmail: "sender@example.com", amazonSenderApproved: true })
     })]);
   }, 20_000);
 

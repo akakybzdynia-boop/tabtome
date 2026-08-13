@@ -8,9 +8,11 @@ const manifest = JSON.parse(readFileSync(join(dist, "manifest.json"), "utf8"));
 const popup = readFileSync(join(dist, "popup.html"), "utf8");
 const popupScript = readFileSync(join(dist, "popup.js"), "utf8");
 const backgroundScript = readFileSync(join(dist, "background.js"), "utf8");
+const backgroundSource = readFileSync(join(root, "extension", "src", "background.ts"), "utf8");
 
-if (manifest.version !== "0.8.0") throw new Error(`Unexpected extension version: ${manifest.version}`);
+if (manifest.version !== "0.9.0") throw new Error(`Unexpected extension version: ${manifest.version}`);
 if (!manifest.permissions?.includes("nativeMessaging")) throw new Error("nativeMessaging permission is missing.");
+if (!manifest.permissions?.includes("contextMenus")) throw new Error("contextMenus permission is missing.");
 if (manifest.permissions?.includes("clipboardRead")) throw new Error("Pasted-text mode must not request clipboardRead.");
 if (!popup.includes('id="mode-text"') || !popup.includes('id="pasted-content"') || !popup.includes('contenteditable="true"')) {
   throw new Error("Rich pasted-text controls are missing from the built popup.");
@@ -27,6 +29,12 @@ if (!backgroundScript.includes('sourcePolicy === "paste" ? "omit" : "include"'))
 }
 if (!backgroundScript.includes("isPublicImageUrl") || !backgroundScript.includes("skippedImages")) {
   throw new Error("Remote image network filtering or visible skipped-image handling is missing.");
+}
+if (!popup.includes('id="without-images"') || !popup.includes('id="selected-count"') || !popup.includes('id="tab-search"')) {
+  throw new Error("Version 0.9 popup controls are missing.");
+}
+if (!backgroundSource.includes("Отправить на Киндл") || !backgroundScript.includes("settings-save") || !backgroundScript.includes("tabResults")) {
+  throw new Error("Version 0.9 background capabilities are missing.");
 }
 
 process.stdout.write("Extension rich-paste and icon contract: OK\n");
