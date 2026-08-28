@@ -23,7 +23,7 @@ const localeMessages = Object.fromEntries(["en", "ru"].map(locale => [
 ]));
 
 for (const [browserName, manifest] of [["Firefox", firefoxManifest], ["Chrome", chromeManifest]]) {
-  if (manifest.version !== "0.11.1") throw new Error(`Unexpected ${browserName} extension version: ${manifest.version}`);
+  if (manifest.version !== "0.11.2") throw new Error(`Unexpected ${browserName} extension version: ${manifest.version}`);
   if (!manifest.permissions?.includes("nativeMessaging")) throw new Error(`${browserName}: nativeMessaging permission is missing.`);
   if (!manifest.permissions?.includes("contextMenus")) throw new Error(`${browserName}: contextMenus permission is missing.`);
   if (manifest.permissions?.includes("clipboardRead")) throw new Error(`${browserName}: pasted-text mode must not request clipboardRead.`);

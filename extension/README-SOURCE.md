@@ -1,6 +1,6 @@
 # Source build instructions
 
-This source package corresponds to **TabTome extension 0.11.1** and builds both browser packages from the same TypeScript, HTML and CSS source. It requires the TabTome Windows app 0.11.1 and uses Native Messaging protocol 2.
+This source package corresponds to **TabTome extension 0.11.2** and builds both browser packages from the same TypeScript, HTML and CSS source. It requires the TabTome Windows app 0.11.1 and uses Native Messaging protocol 2.
 
 The project source code is licensed under the Mozilla Public License 2.0. See `LICENSE`. Bundled third-party packages remain under their own licenses; the notice for the bundled Mozilla Readability source is in `READABILITY-LICENSE.txt`.
 
