@@ -1,11 +1,14 @@
 {
-  "name": "page-to-ereader-local",
-  "version": "0.9.1",
+  "name": "tabtome-extension",
+  "version": "0.11.1",
   "private": true,
+  "license": "MPL-2.0",
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "typecheck": "tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM,DOM.Iterable --types firefox-webext-browser src/background.ts && tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM,DOM.Iterable --types firefox-webext-browser src/content.ts && tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM,DOM.Iterable --types firefox-webext-browser src/options.ts && tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM,DOM.Iterable --types firefox-webext-browser src/popup.ts"
+    "build:firefox": "node build.mjs --browser=firefox",
+    "build:chrome": "node build.mjs --browser=chrome",
+    "typecheck": "tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM,DOM.Iterable --types firefox-webext-browser src/i18n.ts src/background.ts && tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM,DOM.Iterable --types firefox-webext-browser src/content.ts && tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM,DOM.Iterable --types firefox-webext-browser src/i18n.ts src/options.ts && tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM,DOM.Iterable --types firefox-webext-browser src/i18n.ts src/popup.ts"
   },
   "dependencies": { "@mozilla/readability": "0.6.0" },
   "devDependencies": { "@types/firefox-webext-browser": "120.0.5", "esbuild": "0.25.12", "typescript": "5.9.3" }

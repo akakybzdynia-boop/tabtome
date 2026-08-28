@@ -13,11 +13,11 @@ export function createMailer(config: Config) {
   });
   return {
     verify: () => transport.verify(),
-    send: (filename: string, title: string, content: Buffer) => transport.sendMail({
+    send: (recipient: string, filename: string, title: string, content: Buffer) => transport.sendMail({
       from: config.SMTP_FROM,
-      to: config.KINDLE_EMAIL,
+      to: recipient,
       subject: title,
-      text: "Книга создана локальным компонентом Page to E-reader Local.",
+      text: "Книга создана приложением TabTome.",
       attachments: [{ filename, content, contentType: "application/epub+zip" }]
     })
   };

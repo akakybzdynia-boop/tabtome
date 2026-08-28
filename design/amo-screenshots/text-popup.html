@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=380, initial-scale=1">
+  <title>TabTome — pasted text</title>
+  <link rel="stylesheet" href="../../extension/src/popup.css">
+  <style>
+    html { width: 380px; height: 600px; overflow: hidden; }
+    body { height: 600px; max-height: none; overflow: hidden; }
+    main { height: 600px; overflow: hidden; }
+    main { padding-top: 14px; padding-bottom: 14px; }
+    .mode-switch { margin: 9px 0; }
+    .without-images { margin-bottom: 7px; }
+    .rich-editor { min-height: 140px; max-height: 140px; font-size: 12.5px; }
+    .rich-editor h2 { font-size: 18px; }
+    .rich-editor img { float: right; width: 52px; height: 52px; margin: 0 0 8px 12px; border-radius: 9px; }
+    .hint { margin-bottom: 7px; font-size: 11px; }
+    .book-title { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="heading">
+      <h1>Send to e-reader</h1>
+      <button type="button" class="link">Settings</button>
+    </div>
+    <p class="status ok">Ready to send (v0.11.0)</p>
+    <div class="mode-switch" role="tablist" aria-label="Content to send">
+      <button type="button" class="mode" role="tab" aria-selected="false">Tabs</button>
+      <button type="button" class="mode active" role="tab" aria-selected="true">Text</button>
+    </div>
+    <form>
+      <label class="destination-picker"><span>Send to</span><select><option>PocketBook — demo@pbsync.com</option></select></label>
+      <label class="without-images"><input type="checkbox"><span>Only text</span></label>
+      <section>
+        <div class="text-field">
+          <div>Text</div>
+          <div class="rich-editor" role="textbox" aria-label="Text" contenteditable="true">
+            <img src="../../extension/icons/icon-128.png" alt="Open book">
+            <h2>Notes from a long train journey</h2>
+            <p><strong>A saved fragment</strong> can keep its <em>formatting</em>, links, lists, and images.</p>
+            <blockquote>The browser prepares the content already visible in the open page.</blockquote>
+            <ul><li>One EPUB</li><li>Local preparation</li></ul>
+          </div>
+        </div>
+        <div class="text-meta"><span>183 / 1,000,000 characters</span><span>Images: 1 / 30</span></div>
+        <p class="hint">Paragraphs, headings, lists, links, tables, and images are preserved. Page colors, fonts, and styles are removed.</p>
+      </section>
+      <label class="book-title"><span>Book title</span><input value="Train journey notes"></label>
+      <p class="send-summary">Text · with images · demo@pbsync.com</p>
+      <button id="send" type="submit">Send text</button>
+    </form>
+  </main>
+</body>
+</html>

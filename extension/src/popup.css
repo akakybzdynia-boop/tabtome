@@ -1,5 +1,5 @@
 :root { font: 14px system-ui, sans-serif; color: #202124; background: #fff; }
-body { margin: 0; width: 380px; max-height: 720px; overflow: hidden; }
+body { box-sizing: border-box; margin: 0; width: 380px; max-height: 720px; overflow-x: hidden; overflow-y: auto; }
 main { box-sizing: border-box; width: 100%; padding: 16px; }
 .heading { display: flex; align-items: center; justify-content: space-between; }
 h1 { font-size: 20px; margin: 0; }
@@ -12,6 +12,8 @@ h1 { font-size: 20px; margin: 0; }
 .mode { border: 0; padding: 8px; background: #f3f4f6; color: #333; cursor: pointer; }
 .mode + .mode { border-left: 1px solid #b8bec5; }
 .mode.active { background: #1769aa; color: #fff; font-weight: 600; }
+.destination-picker { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; margin: 2px 0 10px; font-weight: 600; }
+.destination-picker select { min-width: 0; padding: 6px 8px; border: 1px solid #767676; border-radius: 5px; background: #fff; color: inherit; font: inherit; }
 .without-images { display: flex; align-items: center; gap: 8px; width: max-content; margin: 2px 0 10px; }
 .without-images input { width: 16px; height: 16px; margin: 0; }
 .tabs-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0 8px; }
@@ -26,7 +28,7 @@ h1 { font-size: 20px; margin: 0; }
 input:not([type="checkbox"]), .rich-editor { box-sizing: border-box; width: 100%; padding: 8px; border: 1px solid #767676; border-radius: 5px; background: #fff; color: inherit; font: inherit; }
 .rich-editor { min-height: 210px; max-height: 330px; overflow: auto; line-height: 1.4; white-space: normal; }
 .rich-editor:empty::before { color: #5f6368; content: attr(data-placeholder); pointer-events: none; }
-.rich-editor:focus, input:focus-visible, button:focus-visible { outline: 2px solid #1769aa; outline-offset: 2px; }
+.rich-editor:focus, input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid #1769aa; outline-offset: 2px; }
 .rich-editor p { margin: 0 0 .7em; }
 .rich-editor h1, .rich-editor h2, .rich-editor h3, .rich-editor h4 { margin: .9em 0 .35em; line-height: 1.2; }
 .rich-editor ul, .rich-editor ol { margin: .5em 0; padding-left: 1.6em; }
@@ -46,3 +48,9 @@ input:not([type="checkbox"]), .rich-editor { box-sizing: border-box; width: 100%
 .job-details li.success { color: #157347; }
 button:disabled { opacity: .55; cursor: not-allowed; }
 [hidden] { display: none !important; }
+
+/* Firefox popup viewport sizing is circular when its root uses vh units.
+   Give it a stable browser-supported height and keep one body scrollbar. */
+html.firefox-popup { width: 380px; height: 600px; overflow: hidden; }
+html.firefox-popup body { height: 100%; max-height: none; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+html.firefox-popup .tabs { max-height: none; overflow: visible; }

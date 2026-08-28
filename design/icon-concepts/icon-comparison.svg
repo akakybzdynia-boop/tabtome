@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 410" role="img" aria-label="Сравнение четырёх вариантов иконки TabTome">
+  <rect width="1040" height="410" fill="#f4f7fa"/>
+  <style>
+    .card{fill:#fff;stroke:#c9d4df;stroke-width:1}.title{font:600 18px system-ui,sans-serif;fill:#102a43}.note{font:14px system-ui,sans-serif;fill:#52667a}.size{font:12px system-ui,sans-serif;fill:#72859a;text-anchor:middle}
+  </style>
+
+  <g transform="translate(20 20)">
+    <rect class="card" width="235" height="370" rx="16"/>
+    <text class="title" x="18" y="32">Текущая</text>
+    <text class="note" x="18" y="55">Страница + стрелка</text>
+    <g transform="translate(54 76) scale(2)">
+      <rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M16 10h20l13 13v29H16z" fill="#fff"/><path d="M36 10l13 13H36z" fill="#a9d4f4"/><path d="M24 38h19m-7-7 7 7-7 7" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(40 245)"><g transform="scale(.5)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M16 10h20l13 13v29H16z" fill="#fff"/><path d="M36 10l13 13H36z" fill="#a9d4f4"/><path d="M24 38h19m-7-7 7 7-7 7" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><text class="size" x="16" y="49">32</text></g>
+    <g transform="translate(102 253)"><g transform="scale(.25)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M16 10h20l13 13v29H16z" fill="#fff"/><path d="M36 10l13 13H36z" fill="#a9d4f4"/><path d="M24 38h19m-7-7 7 7-7 7" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><text class="size" x="8" y="41">16</text></g>
+    <text class="note" x="18" y="330">Понятна «страница»,</text><text class="note" x="18" y="350">но книга не считывается.</text>
+  </g>
+
+  <g transform="translate(275 20)">
+    <rect class="card" width="235" height="370" rx="16"/>
+    <text class="title" x="18" y="32">A. Книга + отправка</text>
+    <text class="note" x="18" y="55">Самый ясный в 16 px</text>
+    <g transform="translate(54 76) scale(2)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M15 11h30a5 5 0 0 1 5 5v36H19a5 5 0 0 1-5-5V16a5 5 0 0 1 1-3z" fill="#fff"/><path d="M20 11v41" fill="none" stroke="#a9d4f4" stroke-width="4"/><path d="M27 32h15m-6-6 6 6-6 6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(40 245)"><g transform="scale(.5)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M15 11h30a5 5 0 0 1 5 5v36H19a5 5 0 0 1-5-5V16a5 5 0 0 1 1-3z" fill="#fff"/><path d="M20 11v41" fill="none" stroke="#a9d4f4" stroke-width="4"/><path d="M27 32h15m-6-6 6 6-6 6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><text class="size" x="16" y="49">32</text></g>
+    <g transform="translate(102 253)"><g transform="scale(.25)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M15 11h30a5 5 0 0 1 5 5v36H19a5 5 0 0 1-5-5V16a5 5 0 0 1 1-3z" fill="#fff"/><path d="M20 11v41" fill="none" stroke="#a9d4f4" stroke-width="4"/><path d="M27 32h15m-6-6 6 6-6 6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><text class="size" x="8" y="41">16</text></g>
+    <text class="note" x="18" y="330">Строгий и простой знак,</text><text class="note" x="18" y="350">но похож на страницу.</text>
+  </g>
+
+  <g transform="translate(530 20)">
+    <rect class="card" width="235" height="370" rx="16"/>
+    <text class="title" x="18" y="32">B. Открытая книга</text>
+    <text class="note" x="18" y="55">Наиболее «книжный» знак</text>
+    <g transform="translate(54 76) scale(2)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M8 19c8-2 16 0 24 6v29c-8-6-16-8-24-6zM56 19c-8-2-16 0-24 6v29c8-6 16-8 24-6z" fill="#fff"/><path d="M32 25v29" stroke="#a9d4f4" stroke-width="3"/><path d="M32 9v15m-6-6 6 6 6-6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(40 245)"><g transform="scale(.5)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M8 19c8-2 16 0 24 6v29c-8-6-16-8-24-6zM56 19c-8-2-16 0-24 6v29c8-6 16-8 24-6z" fill="#fff"/><path d="M32 25v29" stroke="#a9d4f4" stroke-width="3"/><path d="M32 9v15m-6-6 6 6 6-6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><text class="size" x="16" y="49">32</text></g>
+    <g transform="translate(102 253)"><g transform="scale(.25)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><path d="M8 19c8-2 16 0 24 6v29c-8-6-16-8-24-6zM56 19c-8-2-16 0-24 6v29c8-6 16-8 24-6z" fill="#fff"/><path d="M32 25v29" stroke="#a9d4f4" stroke-width="3"/><path d="M32 9v15m-6-6 6 6 6-6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g><text class="size" x="8" y="41">16</text></g>
+    <text class="note" x="18" y="330">Книга читается лучше всего.</text><text class="note" x="18" y="350">Рекомендуемый вариант.</text>
+  </g>
+
+  <g transform="translate(785 20)">
+    <rect class="card" width="235" height="370" rx="16"/>
+    <text class="title" x="18" y="32">C. Электронная книга</text>
+    <text class="note" x="18" y="55">Устройство + загрузка</text>
+    <g transform="translate(54 76) scale(2)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><rect x="13" y="9" width="38" height="48" rx="5" fill="#fff"/><rect x="19" y="15" width="26" height="30" rx="2" fill="#dceefb"/><path d="M24 35c5-2 8-1 8 2 0-3 3-4 8-2v8c-5-2-8-1-8 2 0-3-3-4-8-2z" fill="#1769aa"/><path d="M32 10v17m-6-6 6 6 6-6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="51" r="2" fill="#1769aa"/></g>
+    <g transform="translate(40 245)"><g transform="scale(.5)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><rect x="13" y="9" width="38" height="48" rx="5" fill="#fff"/><rect x="19" y="15" width="26" height="30" rx="2" fill="#dceefb"/><path d="M24 35c5-2 8-1 8 2 0-3 3-4 8-2v8c-5-2-8-1-8 2 0-3-3-4-8-2z" fill="#1769aa"/><path d="M32 10v17m-6-6 6 6 6-6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="51" r="2" fill="#1769aa"/></g><text class="size" x="16" y="49">32</text></g>
+    <g transform="translate(102 253)"><g transform="scale(.25)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/><rect x="13" y="9" width="38" height="48" rx="5" fill="#fff"/><rect x="19" y="15" width="26" height="30" rx="2" fill="#dceefb"/><path d="M24 35c5-2 8-1 8 2 0-3 3-4 8-2v8c-5-2-8-1-8 2 0-3-3-4-8-2z" fill="#1769aa"/><path d="M32 10v17m-6-6 6 6 6-6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="51" r="2" fill="#1769aa"/></g><text class="size" x="8" y="41">16</text></g>
+    <text class="note" x="18" y="330">Точно передаёт назначение,</text><text class="note" x="18" y="350">но деталей больше.</text>
+  </g>
+</svg>

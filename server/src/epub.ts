@@ -3,7 +3,7 @@ import sanitizeHtml from "sanitize-html";
 import type { Article, ArticleImage } from "./types.js";
 
 const xml = (s: string) => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c]!);
-const safeName = (s: string) => s.replace(/[\\/:*?"<>|\x00-\x1f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100) || "Kindle articles";
+const safeName = (s: string) => s.replace(/[\\/:*?"<>|\x00-\x1f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100) || "Articles";
 
 function clean(content: string, imagePaths: Map<string, string>) {
   return sanitizeHtml(content, {
@@ -94,6 +94,6 @@ export async function createEpub(articles: Article[], requestedTitle?: string) {
   manifest.push('<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>', '<item id="css" href="style.css" media-type="text/css"/>');
   zip.file("OEBPS/nav.xhtml", `<?xml version="1.0" encoding="utf-8"?><html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>${xml(title)}</title></head><body><nav epub:type="toc"><h1>${xml(title)}</h1><ol>${nav.join("")}</ol></nav></body></html>`);
   zip.file("OEBPS/style.css", "body{font-family:serif;line-height:1.5;margin:5%}h1{line-height:1.15}.meta,.source{color:#555;font-size:.85em}pre{white-space:pre-wrap}table,img{max-width:100%;height:auto}figure{margin:1em 0;text-align:center}figcaption{font-size:.85em;color:#555}a{color:inherit}");
-  zip.file("OEBPS/content.opf", `<?xml version="1.0" encoding="utf-8"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="book-id">urn:uuid:${id}</dc:identifier><dc:title>${xml(title)}</dc:title><dc:language>${xml(articles[0]?.lang || "en")}</dc:language><dc:creator>Firefox to Kindle</dc:creator><meta property="dcterms:modified">${new Date().toISOString().replace(/\.\d{3}Z$/, "Z")}</meta></metadata><manifest>${manifest.join("")}</manifest><spine>${spine.join("")}</spine></package>`);
+  zip.file("OEBPS/content.opf", `<?xml version="1.0" encoding="utf-8"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="book-id">urn:uuid:${id}</dc:identifier><dc:title>${xml(title)}</dc:title><dc:language>${xml(articles[0]?.lang || "en")}</dc:language><dc:creator>TabTome</dc:creator><meta property="dcterms:modified">${new Date().toISOString().replace(/\.\d{3}Z$/, "Z")}</meta></metadata><manifest>${manifest.join("")}</manifest><spine>${spine.join("")}</spine></package>`);
   return { title, filename: `${title}.epub`, imageCount, buffer: await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }) };
 }

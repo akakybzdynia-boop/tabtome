@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = $PSScriptRoot
 $extensionDirectory = Join-Path $projectRoot "extension\dist"
 $testScript = Join-Path $projectRoot "scripts\test-firefox-popup.mjs"
-$outputDirectory = Join-Path $projectRoot "work\ui-0.9.1"
+$outputDirectory = Join-Path $projectRoot "work\ui-0.11.0"
 $firefoxCandidates = @(
     (Join-Path $env:ProgramFiles "Mozilla Firefox\firefox.exe"),
     (Join-Path ${env:ProgramFiles(x86)} "Mozilla Firefox\firefox.exe")

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Open book with incoming arrow">
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="#1769aa"/>
+  <path d="M8 19c8-2 16 0 24 6v29c-8-6-16-8-24-6zM56 19c-8-2-16 0-24 6v29c8-6 16-8 24-6z" fill="#fff"/>
+  <path d="M32 25v29" stroke="#a9d4f4" stroke-width="3"/>
+  <path d="M32 9v15m-6-6 6 6 6-6" fill="none" stroke="#157347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

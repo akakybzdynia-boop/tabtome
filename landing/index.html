@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TabTome</title>
+  <meta name="description" content="Choose the TabTome site language.">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <main class="prose">
+    <p class="eyebrow">TabTome</p>
+    <h1>Choose a language</h1>
+    <div class="actions">
+      <a class="button" href="/en/">English</a>
+      <a class="button secondary" lang="ru" href="/ru/">Русский</a>
+    </div>
+  </main>
+  <script>
+    const target = navigator.language && navigator.language.toLowerCase().startsWith("ru") ? "/ru/" : "/en/";
+    setTimeout(() => location.replace(target), 400);
+  </script>
+</body>
+</html>

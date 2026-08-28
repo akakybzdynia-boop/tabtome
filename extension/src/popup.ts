@@ -1,4 +1,4 @@
-const REQUIRED_PROTOCOL_VERSION = 1;
+const REQUIRED_PROTOCOL_VERSION = 2;
 const MAX_PASTED_TEXT_CHARS = 1_000_000;
 const MAX_PASTED_HTML_CHARS = 5_000_000;
 const MAX_PASTED_IMAGES = 30;
@@ -16,6 +16,8 @@ const ALLOWED_TAGS = new Set([
 const DROP_TAGS = new Set(["script", "style", "iframe", "object", "embed", "form", "input", "button", "textarea", "select", "option", "svg", "math"]);
 
 type SendMode = "tabs" | "text";
+type DestinationId = "kindle" | "pocketbook";
+type DeliveryDestination = { id: DestinationId; kind: DestinationId; email: string; senderApproved: boolean };
 type ImageSource = { id: string; url: string; alt: string };
 type RawPastedImage = { id: string; mediaType: string; data: string; bytes: number };
 type TabResult = { tabId: number; title: string; status: "pending" | "success" | "error"; message?: string };
@@ -23,6 +25,7 @@ type JobState = {
   status: "preparing" | "sending" | "success" | "error" | "interrupted";
   message: string;
   jobId: string;
+  destinationId?: DestinationId;
   retryJobId?: string;
   source?: SendMode;
   tabIds?: number[];
@@ -39,7 +42,11 @@ type HealthReply = {
   error?: string;
   code?: string;
 };
-type NativeSettingsReply = { ok?: boolean; settings?: { kindleEmail?: string }; error?: string };
+type NativeSettingsReply = {
+  ok?: boolean;
+  settings?: { destinations: DeliveryDestination[]; defaultDestinationId: DestinationId };
+  error?: string;
+};
 type TextDraft = {
   content: string;
   title: string;
@@ -59,14 +66,15 @@ const tabsEl = document.querySelector<HTMLDivElement>("#tabs")!;
 const tabsPanel = document.querySelector<HTMLElement>("#tabs-panel")!;
 const textPanel = document.querySelector<HTMLElement>("#text-panel")!;
 const editor = document.querySelector<HTMLDivElement>("#pasted-content")!;
-const textCount = document.querySelector<HTMLSpanElement>("#text-count")!;
-const pastedImageCount = document.querySelector<HTMLSpanElement>("#pasted-image-count")!;
+const charactersLimit = document.querySelector<HTMLSpanElement>("#characters-limit")!;
+const imagesLimit = document.querySelector<HTMLSpanElement>("#images-limit")!;
 const tabsModeButton = document.querySelector<HTMLButtonElement>("#mode-tabs")!;
 const textModeButton = document.querySelector<HTMLButtonElement>("#mode-text")!;
 const serviceEl = document.querySelector<HTMLParagraphElement>("#server")!;
 const resultEl = document.querySelector<HTMLParagraphElement>("#result")!;
 const form = document.querySelector<HTMLFormElement>("#form")!;
 const send = document.querySelector<HTMLButtonElement>("#send")!;
+const destinationSelect = document.querySelector<HTMLSelectElement>("#destination")!;
 const titleInput = document.querySelector<HTMLInputElement>("#title")!;
 const withoutImages = document.querySelector<HTMLInputElement>("#without-images")!;
 const tabSearch = document.querySelector<HTMLInputElement>("#tab-search")!;
@@ -76,6 +84,8 @@ const jobDetails = document.querySelector<HTMLDetailsElement>("#job-details")!;
 const jobSummary = document.querySelector<HTMLElement>("#job-summary")!;
 const jobTabs = document.querySelector<HTMLUListElement>("#job-tabs")!;
 const nativeSessionStorage = (browser.storage as unknown as { session: SessionStorage }).session;
+const usesFirefoxPopupLayout = "getBrowserInfo" in browser.runtime;
+document.documentElement.classList.toggle("firefox-popup", usesFirefoxPopupLayout);
 
 const rawImages = new Map<string, RawPastedImage>();
 const remoteImages = new Map<string, ImageSource>();
@@ -83,7 +93,7 @@ let lastJob: JobState | undefined;
 let currentMode: SendMode = "tabs";
 let serviceReady = false;
 let richTextSupported = false;
-let kindleRecipient = "";
+let deliveryDestinations: DeliveryDestination[] = [];
 let draftTimer: number | undefined;
 
 function show(el: HTMLElement, message: string, type: "ok" | "error" | "warning" | "" = "") {
@@ -97,6 +107,14 @@ function eligible(tab: browser.tabs.Tab) {
 
 function jobMode(job?: JobState): SendMode {
   return job?.source === "text" ? "text" : "tabs";
+}
+
+function selectedDestination() {
+  return deliveryDestinations.find(destination => destination.id === destinationSelect.value);
+}
+
+function sameJobContext(job?: JobState) {
+  return jobMode(job) === currentMode && Boolean(job?.destinationId) && job?.destinationId === destinationSelect.value;
 }
 
 function editorText() {
@@ -117,45 +135,36 @@ function pruneImageState() {
 
 function updateSendButton() {
   const busy = lastJob?.status === "preparing" || lastJob?.status === "sending";
-  const sameMode = jobMode(lastJob) === currentMode;
+  const sameMode = sameJobContext(lastJob);
   const textLength = editorText().length;
   const invalidText = currentMode === "text" && ((!textLength && (withoutImages.checked || currentImageIds().size === 0)) || textLength > MAX_PASTED_TEXT_CHARS);
-  send.disabled = !serviceReady || busy || (currentMode === "text" && (!richTextSupported || invalidText));
-  if (busy) send.textContent = "Отправка выполняется в фоне…";
-  else if (sameMode && lastJob?.status === "interrupted") send.textContent = "Повторить после проверки Kindle";
-  else if (sameMode && lastJob?.status === "error" && lastJob.retryJobId) send.textContent = "Повторить отправку";
-  else send.textContent = currentMode === "text" ? "Отправить текст" : "Отправить выбранное";
+  send.disabled = !serviceReady || !selectedDestination() || busy || (currentMode === "text" && (!richTextSupported || invalidText));
+  if (busy) send.textContent = ptMessage("sending_in_background");
+  else if (sameMode && lastJob?.status === "interrupted") send.textContent = ptMessage("retry_after_checking");
+  else if (sameMode && lastJob?.status === "error" && lastJob.retryJobId) send.textContent = ptMessage("retry_send");
+  else send.textContent = ptMessage(currentMode === "text" ? "send_text" : "send_selected");
 }
 
 function selectedTabInputs() {
   return [...document.querySelectorAll<HTMLInputElement>('input[name="tab"]:checked')];
 }
 
-function tabWord(count: number) {
-  const mod100 = count % 100;
-  const mod10 = count % 10;
-  if (mod100 >= 11 && mod100 <= 14) return "вкладок";
-  if (mod10 === 1) return "вкладка";
-  if (mod10 >= 2 && mod10 <= 4) return "вкладки";
-  return "вкладок";
-}
-
 function updateSummary() {
-  const imageMode = withoutImages.checked ? "без изображений" : "с изображениями";
-  const recipient = kindleRecipient ? ` · ${kindleRecipient}` : "";
+  const imageMode = ptMessage(withoutImages.checked ? "without_images_summary" : "with_images");
+  const recipient = selectedDestination()?.email ? ` · ${selectedDestination()!.email}` : "";
   if (currentMode === "tabs") {
     const count = selectedTabInputs().length;
-    selectedCount.textContent = `Выбрано: ${count}`;
-    sendSummary.textContent = `${count} ${tabWord(count)} · ${imageMode}${recipient}`;
+    selectedCount.textContent = ptMessage("selected_count", [ptFormatNumber(count)]);
+    sendSummary.textContent = `${ptCountMessage("tabs_count", count)} · ${imageMode}${recipient}`;
   } else {
-    sendSummary.textContent = `${editorText().length.toLocaleString("ru-RU")} символов · ${imageMode}${recipient}`;
+    sendSummary.textContent = `${ptCountMessage("characters_count", editorText().length)} · ${imageMode}${recipient}`;
   }
 }
 
 function updateEditorMeta() {
   pruneImageState();
-  textCount.textContent = editorText().length.toLocaleString("ru-RU");
-  pastedImageCount.textContent = currentImageIds().size.toLocaleString("ru-RU");
+  charactersLimit.textContent = ptMessage("characters_limit", [ptFormatNumber(editorText().length)]);
+  imagesLimit.textContent = ptMessage("images_limit", [ptFormatNumber(currentImageIds().size)]);
   updateSendButton();
   updateSummary();
 }
@@ -172,7 +181,7 @@ function setMode(mode: SendMode) {
   tabsModeButton.tabIndex = tabsActive ? 0 : -1;
   textModeButton.tabIndex = tabsActive ? -1 : 0;
   if (!tabsActive && serviceReady && !richTextSupported) {
-    show(resultEl, "Для форматированного текста обновите локальный компонент до версии 0.8.0 или новее.", "warning");
+    show(resultEl, ptMessage("rich_text_upgrade"), "warning");
   }
   updateSendButton();
   updateSummary();
@@ -190,11 +199,15 @@ function renderJob(job?: JobState) {
     const success = tabResults.filter(item => item.status === "success").length;
     const failed = tabResults.filter(item => item.status === "error").length;
     const pending = tabResults.length - success - failed;
-    jobSummary.textContent = `Вкладки: подготовлено ${success}, ошибок ${failed}${pending ? `, в работе ${pending}` : ""}`;
+    const pendingSuffix = pending ? ptMessage("job_pending_suffix", [ptFormatNumber(pending)]) : "";
+    jobSummary.textContent = ptMessage("job_summary", [ptFormatNumber(success), ptFormatNumber(failed), pendingSuffix]);
     for (const item of tabResults) {
       const row = document.createElement("li");
       row.className = item.status;
-      row.textContent = `${item.title} — ${item.status === "success" ? "подготовлено" : item.status === "error" ? item.message || "ошибка" : "ожидает"}`;
+      const status = item.status === "success"
+        ? ptMessage("job_ready")
+        : item.status === "error" ? item.message || ptMessage("job_error") : ptMessage("job_waiting");
+      row.textContent = `${item.title} — ${status}`;
       jobTabs.append(row);
     }
     if (failed) jobDetails.open = true;
@@ -296,7 +309,7 @@ function sanitizeNode(node: Node, stats: { skippedImages: number }): Node | null
     if (src.startsWith("data:")) clean.setAttribute("src", src);
     else {
       clean.setAttribute("data-kindle-remote", "true");
-      if (!title) clean.setAttribute("title", "Изображение будет загружено только после нажатия «Отправить»");
+      if (!title) clean.setAttribute("title", ptMessage("remote_image_title"));
     }
     return clean;
   }
@@ -366,7 +379,7 @@ function insertFragment(fragment: DocumentFragment, requestedRange?: Range) {
 function fileToData(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(reader.error || new Error("Не удалось прочитать изображение"));
+    reader.onerror = () => reject(reader.error || new Error(ptMessage("image_read_failed")));
     reader.onload = () => resolve(String(reader.result).split(",", 2)[1] || "");
     reader.readAsDataURL(file);
   });
@@ -383,12 +396,12 @@ async function imageFilesFragment(files: File[]) {
       rawImages.set(id, { id, mediaType: file.type, data, bytes: file.size });
       const image = document.createElement("img");
       image.dataset.kindleImageId = id;
-      image.alt = file.name || "Вставленное изображение";
+      image.alt = file.name || ptMessage("pasted_image_alt");
       image.src = `data:${file.type};base64,${data}`;
       fragment.append(image);
     } catch { skipped++; }
   }
-  if (skipped) show(resultEl, `Пропущено изображений: ${skipped}. Проверьте лимит 30 файлов и 15 МБ.`, "warning");
+  if (skipped) show(resultEl, ptMessage("images_skipped_files", [ptFormatNumber(skipped)]), "warning");
   return fragment;
 }
 
@@ -397,7 +410,7 @@ async function insertTransfer(transfer: DataTransfer, range?: Range) {
   const html = transfer.getData("text/html");
   if (html) {
     const { fragment, skippedImages } = sanitizedHtmlFragment(html);
-    if (skippedImages) show(resultEl, `Пропущено изображений: ${skippedImages}. Допустимы HTTP(S) и изображения до 12 МБ; общий лимит — 30 изображений и 15 МБ.`, "warning");
+    if (skippedImages) show(resultEl, ptMessage("images_skipped_sources", [ptFormatNumber(skippedImages)]), "warning");
     if (fragment.textContent?.trim() || fragment.querySelector("img,hr,table")) {
       insertFragment(fragment, range);
       return;
@@ -415,7 +428,7 @@ async function insertTransfer(transfer: DataTransfer, range?: Range) {
 
   const text = transfer.getData("text/plain");
   if (editorText().length + text.length > MAX_PASTED_TEXT_CHARS) {
-    show(resultEl, "Вставка превышает лимит 1 000 000 символов.", "error");
+    show(resultEl, ptMessage("paste_too_long"), "error");
     return;
   }
   insertFragment(plainTextFragment(text), range);
@@ -431,25 +444,29 @@ function automaticTitle() {
   if (currentMode === "text") {
     const heading = editor.querySelector("h1,h2,h3,h4,h5,h6")?.textContent?.trim();
     const firstLine = editorText().split("\n").find(line => line.trim())?.trim();
-    return (heading || firstLine || `Текст — ${new Date().toLocaleDateString("ru-RU")}`).slice(0, 200);
+    return (heading || firstLine || ptMessage("text_default_title", [ptFormatDate(new Date())])).slice(0, 200);
   }
   const selected = selectedTabInputs().map(input => input.closest("label")?.querySelector("span")?.textContent?.trim()).filter((value): value is string => Boolean(value));
   if (!selected.length) return "";
-  return (selected.length === 1 ? selected[0] : `${selected[0]} и ещё ${selected.length - 1}`).slice(0, 200);
+  return (selected.length === 1 ? selected[0] : ptMessage("and_more", [selected[0], ptFormatNumber(selected.length - 1)])).slice(0, 200);
 }
 
 function updateAutomaticTitle() {
   const suggestion = automaticTitle();
-  titleInput.placeholder = suggestion ? `Авто: ${suggestion}` : "Необязательно";
+  titleInput.placeholder = suggestion ? ptMessage("automatic_title", [suggestion]) : ptMessage("optional");
 }
 
 function fitTabList() {
+  if (usesFirefoxPopupLayout) {
+    tabsEl.style.removeProperty("max-height");
+    return;
+  }
   if (currentMode !== "tabs" || tabsEl.hidden) return;
   tabsEl.style.maxHeight = "420px";
   const rectangle = tabsEl.getBoundingClientRect();
   const trailingHeight = Math.max(0, document.documentElement.scrollHeight - rectangle.bottom);
   const available = window.innerHeight - rectangle.top - trailingHeight - 8;
-  tabsEl.style.maxHeight = `${Math.max(180, Math.min(420, available))}px`;
+  tabsEl.style.maxHeight = `${Math.max(96, Math.min(420, available))}px`;
 }
 
 async function persistDraft() {
@@ -510,7 +527,7 @@ async function restoreDraft() {
   }
   titleInput.value = draft.title;
   updateEditorMeta();
-  if (draft.imagesOmitted) show(resultEl, "Черновик восстановлен без изображений: их объём превышал лимит временного хранилища.", "warning");
+  if (draft.imagesOmitted) show(resultEl, ptMessage("draft_without_images"), "warning");
   return Boolean(editorText() || currentImageIds().size || titleInput.value);
 }
 
@@ -534,17 +551,30 @@ async function init() {
 
   try {
     const health = await browser.runtime.sendMessage({ type: "native-health" }) as HealthReply;
-    if (!health?.ok || !health.configOk) throw new Error(health?.error || "Локальный компонент не настроен.");
+    if (!health?.ok || !health.configOk) throw new Error(health?.error || ptMessage("companion_not_configured"));
     if (Number(health.protocolVersion) !== REQUIRED_PROTOCOL_VERSION) {
-      throw new Error("Версии расширения и локального компонента несовместимы. Обновите оба компонента.");
+      throw new Error(ptMessage("protocol_mismatch"));
     }
     serviceReady = true;
     richTextSupported = Boolean(health.capabilities?.includes("pastedRichText"));
-    show(serviceEl, `Локальный компонент работает (v${health.hostVersion || "0.9.1"})`, "ok");
-    if (health.capabilities?.includes("emailSettings")) {
-      const settings = await browser.runtime.sendMessage({ type: "native-settings-get" }) as NativeSettingsReply;
-      kindleRecipient = settings.settings?.kindleEmail || "";
+    if (!health.capabilities?.includes("deliveryTargets")) {
+      throw new Error(ptMessage("destination_upgrade"));
     }
+    show(serviceEl, ptMessage("companion_running", [health.hostVersion || "0.11.1"]), "ok");
+    const settings = await browser.runtime.sendMessage({ type: "native-settings-get" }) as NativeSettingsReply;
+    if (!settings?.ok || !settings.settings) throw new Error(settings?.error || ptMessage("destinations_read_failed"));
+    deliveryDestinations = settings.settings.destinations || [];
+    destinationSelect.replaceChildren(...deliveryDestinations.map(destination => {
+      const option = document.createElement("option");
+      option.value = destination.id;
+      option.textContent = `${destination.kind === "kindle" ? "Kindle" : "PocketBook"} — ${destination.email}`;
+      return option;
+    }));
+    const restoredDestination = storedJob?.destinationId && deliveryDestinations.some(item => item.id === storedJob.destinationId)
+      ? storedJob.destinationId
+      : settings.settings.defaultDestinationId;
+    if (deliveryDestinations.some(item => item.id === restoredDestination)) destinationSelect.value = restoredDestination;
+    if (!deliveryDestinations.length) throw new Error(ptMessage("destination_not_configured"));
   } catch (error) {
     serviceReady = false;
     show(serviceEl, error instanceof Error ? error.message : String(error), "error");
@@ -568,7 +598,7 @@ async function init() {
       ? tab.id === contextRequest.tabId
       : restoreSelection ? Boolean(tab.id && storedJob?.tabIds?.includes(tab.id)) : tab.id === active;
     const title = document.createElement("span");
-    title.textContent = tab.title || tab.url || "Вкладка";
+    title.textContent = tab.title || tab.url || ptMessage("untitled_tab");
     title.title = tab.url || "";
     label.append(checkbox, title);
     tabsEl.append(label);
@@ -609,9 +639,9 @@ tabsEl.addEventListener("change", () => {
   updateAutomaticTitle();
 });
 tabSearch.addEventListener("input", () => {
-  const query = tabSearch.value.trim().toLocaleLowerCase("ru-RU");
+  const query = tabSearch.value.trim().toLocaleLowerCase(ptUiLocale);
   for (const row of tabsEl.querySelectorAll<HTMLLabelElement>(".tab")) {
-    row.hidden = Boolean(query) && !row.textContent?.toLocaleLowerCase("ru-RU").includes(query);
+    row.hidden = Boolean(query) && !row.textContent?.toLocaleLowerCase(ptUiLocale).includes(query);
   }
 });
 tabsModeButton.addEventListener("click", () => setMode("tabs"));
@@ -642,6 +672,10 @@ withoutImages.addEventListener("change", () => {
   updateSendButton();
   updateSummary();
 });
+destinationSelect.addEventListener("change", () => {
+  updateSendButton();
+  updateSummary();
+});
 window.addEventListener("resize", fitTabList);
 function insertWithoutPopupJump(transfer: DataTransfer, range?: Range) {
   const scrollLeft = window.scrollX;
@@ -668,20 +702,22 @@ form.addEventListener("submit", event => {
   const tabIds = [...document.querySelectorAll<HTMLInputElement>('input[name="tab"]:checked')].map(input => Number(input.value));
   const text = editorText();
   const content = serializedContent();
-  if (currentMode === "tabs" && !tabIds.length) return show(resultEl, "Выберите хотя бы одну вкладку.", "error");
-  if (currentMode === "text" && !text && currentImageIds().size === 0) return show(resultEl, "Вставьте текст или изображение для отправки.", "error");
-  if (currentMode === "text" && withoutImages.checked && !text) return show(resultEl, "После исключения изображений в книге не осталось текста.", "error");
-  if (currentMode === "text" && text.length > MAX_PASTED_TEXT_CHARS) return show(resultEl, "Текст превышает лимит 1 000 000 символов.", "error");
-  if (currentMode === "text" && (!content || content.length > MAX_PASTED_HTML_CHARS)) return show(resultEl, "Форматированный текст пуст или слишком велик.", "error");
-  if (currentMode === "text" && !richTextSupported) return show(resultEl, "Локальный компонент не поддерживает форматированный текст.", "error");
+  if (currentMode === "tabs" && !tabIds.length) return show(resultEl, ptMessage("select_at_least_one_tab"), "error");
+  if (currentMode === "text" && !text && currentImageIds().size === 0) return show(resultEl, ptMessage("paste_content_to_send"), "error");
+  if (currentMode === "text" && withoutImages.checked && !text) return show(resultEl, ptMessage("no_text_after_images_removed"), "error");
+  if (currentMode === "text" && text.length > MAX_PASTED_TEXT_CHARS) return show(resultEl, ptMessage("text_too_long"), "error");
+  if (currentMode === "text" && (!content || content.length > MAX_PASTED_HTML_CHARS)) return show(resultEl, ptMessage("formatted_text_invalid"), "error");
+  if (currentMode === "text" && !richTextSupported) return show(resultEl, ptMessage("rich_text_not_supported"), "error");
+  const destination = selectedDestination();
+  if (!destination) return show(resultEl, ptMessage("select_recipient"), "error");
 
   send.disabled = true;
-  send.textContent = "Запускаю фоновую отправку…";
+  send.textContent = ptMessage("starting_background_send");
   const title = titleInput.value.trim() || automaticTitle() || undefined;
-  const sameMode = jobMode(lastJob) === currentMode;
+  const sameMode = sameJobContext(lastJob);
   let jobId: string;
   if (sameMode && lastJob?.status === "interrupted") {
-    const confirmed = window.confirm("Сначала проверьте библиотеку Kindle и почту отправителя. Книга могла быть доставлена. Всё равно создать новую отправку с риском дубликата?");
+    const confirmed = window.confirm(ptMessage("duplicate_confirmation"));
     if (!confirmed) {
       updateSendButton();
       return;
@@ -697,12 +733,14 @@ form.addEventListener("submit", event => {
     .filter(image => activeIds.has(image.id))
     .map(({ id, mediaType, data }) => ({ id, mediaType, data }));
   const message = currentMode === "text"
-    ? { type: "start-text-send", jobId, text, content, imageSources, images, title, withoutImages: withoutImages.checked }
-    : { type: "start-send", jobId, tabIds, title, withoutImages: withoutImages.checked };
+    ? { type: "start-text-send", jobId, destinationId: destination.id, text, content, imageSources, images, title, withoutImages: withoutImages.checked }
+    : { type: "start-send", jobId, destinationId: destination.id, tabIds, title, withoutImages: withoutImages.checked };
   void browser.runtime.sendMessage(message).then(response => {
     if (response && !response.ok) show(resultEl, response.error, "error");
   }).catch(error => show(resultEl, error instanceof Error ? error.message : String(error), "error"));
 });
 
-updateEditorMeta();
-void init();
+void ptInitializeI18n().then(() => {
+  updateEditorMeta();
+  return init();
+}).catch(error => show(serviceEl, error instanceof Error ? error.message : String(error), "error"));

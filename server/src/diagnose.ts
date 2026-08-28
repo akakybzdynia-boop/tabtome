@@ -4,14 +4,20 @@ import { loadConfig } from "./config.js";
 import { JobStore } from "./job-store.js";
 import { loadSmtpEnvironment, migratePlaintextSmtpPassword } from "./smtp-password.js";
 import { SettingsStore } from "./settings-store.js";
-import { ENV_FILE, JOB_DIRECTORY, SERVER_ROOT, USER_SETTINGS_FILE } from "./paths.js";
+import { DATA_ROOT, ENV_FILE, JOB_DIRECTORY, USER_SETTINGS_FILE } from "./paths.js";
 
 async function main() {
-  const migration = migratePlaintextSmtpPassword(SERVER_ROOT);
+  const migration = migratePlaintextSmtpPassword(DATA_ROOT);
   if (migration.migrated) process.stdout.write("SMTP password migrated from .env to Windows DPAPI.\n");
   else if (migration.removedPlaintext) process.stdout.write("Redundant SMTP_PASS removed from .env.\n");
   loadDotenv({ path: ENV_FILE });
-  const environment = new SettingsStore(USER_SETTINGS_FILE).apply(loadSmtpEnvironment(process.env, SERVER_ROOT));
+  const settings = new SettingsStore(USER_SETTINGS_FILE);
+  const current = settings.resolve(process.env);
+  if (!current.destinations.length) throw new Error("Не настроен ни один получатель Kindle или PocketBook.");
+  if (!current.destinations.some(destination => destination.senderApproved)) {
+    throw new Error("Ни для одного получателя не подтверждён разрешённый адрес отправителя.");
+  }
+  const environment = settings.apply(loadSmtpEnvironment(process.env, DATA_ROOT));
   const configuration = loadConfig(environment);
   new JobStore(JOB_DIRECTORY);
   process.stdout.write("Configuration and job storage: OK\nChecking SMTP connection...\n");

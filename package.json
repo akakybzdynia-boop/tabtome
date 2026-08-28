@@ -1,13 +1,17 @@
 {
-  "name": "firefox-to-kindle",
+  "name": "tabtome",
   "private": true,
+  "license": "MPL-2.0",
   "workspaces": [
     "server",
     "extension"
   ],
   "scripts": {
-    "build": "npm run build -w server && npm run build -w extension && powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\build-native-launcher.ps1",
-    "test": "npm run build && npm run test -w server && npm run typecheck -w extension && node scripts/test-extension-contract.mjs && node scripts/test-native-launcher.mjs",
+    "build": "npm run build -w server && npm run build -w extension && powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\generate-windows-icon.ps1 && powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\build-native-launcher.ps1 && powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\build-settings-tool.ps1",
+    "build:firefox": "npm run build:firefox -w extension",
+    "build:chrome": "npm run build:chrome -w extension",
+    "build:installer": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\installer\\build-installer.ps1",
+    "test": "npm run build && npm run test -w server && npm run typecheck -w extension && node scripts/test-extension-contract.mjs && node scripts/test-native-launcher.mjs && node scripts/test-public-pages.mjs && node scripts/test-signing-workflows.mjs",
     "diagnose": "npm run diagnose -w server",
     "test:firefox-ui": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\test-firefox-popup.ps1"
   },

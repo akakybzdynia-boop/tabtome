@@ -15,13 +15,14 @@ const profilePath = join(temporaryRoot, "profile");
 await mkdir(profilePath);
 await mkdir(outputPath, { recursive: true });
 
-const titles = [
+const titleSamples = [
   "Блины — рассказ Н. Тэффи",
   "Усолье-Камское: история города",
   "Flying like a Bird",
   "Яблоку негде упасть — длинное название страницы",
   "Ключ к тексту: заметки о чтении"
 ];
+const titles = Array.from({ length: 25 }, (_, index) => `${titleSamples[index % titleSamples.length]} — ${index + 1}`);
 let trackingRequests = 0;
 const server = createServer((request, response) => {
   if (request.url?.startsWith("/tracking.png")) trackingRequests++;
@@ -145,7 +146,7 @@ try {
 
   const origin = await extensionOriginFromProfile();
   const popup = await command("browsingContext.create", { type: "tab" });
-  await command("browsingContext.setViewport", { context: popup.context, viewport: { width: 412, height: 640 }, devicePixelRatio: 1 });
+  await command("browsingContext.setViewport", { context: popup.context, viewport: { width: 412, height: 600 }, devicePixelRatio: 1 });
   await command("browsingContext.navigate", { context: popup.context, url: `${origin}/popup.html`, wait: "complete" });
   let alignment;
   for (let attempt = 0; attempt < 100; attempt++) {
@@ -163,6 +164,32 @@ try {
   }
   const tabsShot = await command("browsingContext.captureScreenshot", { context: popup.context, origin: "viewport" });
   await writeFile(join(outputPath, "popup-tabs.png"), Buffer.from(tabsShot.data, "base64"));
+
+  const tabsReachability = await evaluate(popup.context, `
+    const root = document.body;
+    root.scrollTop = root.scrollHeight;
+    const lastTab = document.querySelector('.tab:last-child').getBoundingClientRect();
+    const send = document.querySelector('#send').getBoundingClientRect();
+    const maxScroll = root.scrollHeight - root.clientHeight;
+    return {
+      firefoxLayout: document.documentElement.classList.contains('firefox-popup'),
+      popupHeight: root.clientHeight,
+      maxScroll,
+      scrollTop: root.scrollTop,
+      lastTabBottom: lastTab.bottom,
+      sendBottom: send.bottom,
+      viewportHeight: window.innerHeight,
+      nestedTabsScroll: getComputedStyle(document.querySelector('.tabs')).overflowY
+    };
+  `);
+  if (!tabsReachability.firefoxLayout || tabsReachability.popupHeight !== 600 || tabsReachability.maxScroll <= 0 ||
+      tabsReachability.scrollTop < tabsReachability.maxScroll - 1 ||
+      tabsReachability.lastTabBottom > tabsReachability.viewportHeight + 1 ||
+      tabsReachability.sendBottom > tabsReachability.viewportHeight + 1 ||
+      tabsReachability.nestedTabsScroll !== "visible") {
+    throw new Error(`Firefox tab list cannot be scrolled to completion: ${JSON.stringify(tabsReachability)}`);
+  }
+  await evaluate(popup.context, `document.body.scrollTop = 0; return true;`);
 
   const keyboardTabs = await evaluate(popup.context, `
     const tabsButton = document.querySelector('#mode-tabs');
@@ -189,23 +216,35 @@ try {
     editor.dispatchEvent(paste);
     return {
       html: editor.innerHTML,
-      textCount: document.querySelector('#text-count').textContent,
-      imageCount: document.querySelector('#pasted-image-count').textContent,
+      charactersLimit: document.querySelector('#characters-limit').textContent,
+      imageCount: editor.querySelectorAll('img[data-kindle-image-id]').length,
       remoteHasSrc: [...editor.querySelectorAll('img')].some(image => image.alt === 'Сетевое' && image.hasAttribute('src')),
       remoteAlt: [...editor.querySelectorAll('img')].find(image => image.dataset.kindleRemote === 'true')?.alt
     };
   `);
   await new Promise(resolve => setTimeout(resolve, 200));
   const postPaste = await evaluate(popup.context, `return { scrollY: window.scrollY, visualTop: window.visualViewport?.offsetTop || 0, headingTop: document.querySelector('.heading').getBoundingClientRect().top };`);
-  if (!pasteResult.html.includes("<strong>") || !pasteResult.html.includes("data-kindle-image-id") || pasteResult.html.includes("script") || pasteResult.html.includes("onclick") || pasteResult.imageCount !== "2" || pasteResult.remoteHasSrc || pasteResult.remoteAlt !== "Сетевое" || trackingRequests !== 0 || postPaste.scrollY !== 0 || postPaste.visualTop !== 0 || postPaste.headingTop < 0) {
+  if (!pasteResult.html.includes("<strong>") || !pasteResult.html.includes("data-kindle-image-id") || pasteResult.html.includes("script") || pasteResult.html.includes("onclick") || pasteResult.imageCount !== 2 || pasteResult.remoteHasSrc || pasteResult.remoteAlt !== "Сетевое" || trackingRequests !== 0 || postPaste.scrollY !== 0 || postPaste.visualTop !== 0 || postPaste.headingTop < 0) {
     throw new Error(`Rich paste was not sanitized correctly: ${JSON.stringify(pasteResult)}`);
   }
   const textShot = await command("browsingContext.captureScreenshot", { context: popup.context, origin: "viewport" });
   await writeFile(join(outputPath, "popup-rich-text.png"), Buffer.from(textShot.data, "base64"));
 
+  const textReachability = await evaluate(popup.context, `
+    const root = document.body;
+    root.scrollTop = root.scrollHeight;
+    const send = document.querySelector('#send').getBoundingClientRect();
+    const maxScroll = root.scrollHeight - root.clientHeight;
+    return { maxScroll, scrollTop: root.scrollTop, sendBottom: send.bottom, viewportHeight: window.innerHeight };
+  `);
+  if (textReachability.maxScroll <= 0 || textReachability.scrollTop < textReachability.maxScroll - 1 ||
+      textReachability.sendBottom > textReachability.viewportHeight + 1) {
+    throw new Error(`Firefox text mode cannot reach the send button: ${JSON.stringify(textReachability)}`);
+  }
+
   await command("webExtension.uninstall", { extension: installed.extension });
   await command("browser.close", {}).catch(() => undefined);
-  process.stdout.write(`Firefox popup UI: OK (${alignment.count} aligned rows, rich paste sanitized)\n`);
+  process.stdout.write(`Firefox popup UI: OK (${alignment.count} aligned rows, both modes scroll to completion, rich paste sanitized)\n`);
 } finally {
   for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error("Firefox popup test stopped.")); }
   pending.clear();

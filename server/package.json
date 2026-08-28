@@ -1,7 +1,8 @@
 {
-  "name": "@page-to-ereader/native-host",
-  "version": "0.9.1",
+  "name": "@tabtome/native-host",
+  "version": "0.11.1",
   "private": true,
+  "license": "MPL-2.0",
   "type": "module",
   "scripts": {
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc",

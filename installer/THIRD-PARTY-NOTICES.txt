@@ -1,0 +1,11 @@
+The original TabTome source code is licensed under the Mozilla Public License 2.0. The following bundled runtime components remain under their own licenses:
+
+- Node.js, distributed under the MIT license and additional licenses listed in runtime\LICENSE.
+- dotenv, MIT license.
+- JSZip, MIT or GPLv3 license; this distribution uses it under the MIT license.
+- Nodemailer, MIT-0 license.
+- sanitize-html, MIT license.
+- Zod, MIT license.
+
+The corresponding package license files are included inside server\node_modules.
+Source code and exact package versions are provided with the TabTome project.

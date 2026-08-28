@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { spawnSync, type SpawnSyncOptionsWithStringEncoding, type SpawnSyncReturns } from "node:child_process";
 import { parse as parseDotenv } from "dotenv";
-import { SERVER_ROOT } from "./paths.js";
+import { DATA_ROOT } from "./paths.js";
 
 type Runner = (
   command: string,
@@ -77,7 +77,7 @@ function protectPassword(
 }
 
 export function migratePlaintextSmtpPassword(
-  serverDirectory = SERVER_ROOT,
+  serverDirectory = DATA_ROOT,
   runner: Runner = spawnSync,
   platform: NodeJS.Platform = process.platform,
   environment: NodeJS.ProcessEnv = process.env
@@ -124,7 +124,7 @@ export function migratePlaintextSmtpPassword(
 
 export function loadSmtpEnvironment(
   source: NodeJS.ProcessEnv,
-  serverDirectory = SERVER_ROOT,
+  serverDirectory = DATA_ROOT,
   runner: Runner = spawnSync,
   platform: NodeJS.Platform = process.platform
 ) {

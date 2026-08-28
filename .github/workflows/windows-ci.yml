@@ -1,0 +1,68 @@
+name: Windows CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.18.1
+          cache: npm
+
+      - name: Install dependencies
+        shell: pwsh
+        run: npm.cmd ci
+
+      - name: Run project tests
+        shell: pwsh
+        run: npm.cmd test
+
+      - name: Prepare pinned Windows build tools
+        shell: pwsh
+        run: ./installer/prepare-build-tools.ps1
+
+      - name: Build unsigned Windows installer
+        shell: pwsh
+        run: ./installer/build-installer.ps1 -SkipTests
+
+      - name: Test isolated install and uninstall
+        shell: pwsh
+        run: ./installer/test-installer.ps1
+
+      - name: Build reproducible release archives
+        shell: pwsh
+        run: ./scripts/package-release.ps1 -SkipInstaller
+
+      - name: Upload unsigned verification artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: tabtome-unsigned-${{ github.sha }}
+          path: |
+            outputs/1-TABTOME-FIREFOX-ADDON-*.zip
+            outputs/1-TABTOME-CHROME-ADDON-*.zip
+            outputs/2-TABTOME-SOURCE-CODE-*.zip
+            outputs/TabTome-Project-*.zip
+            outputs/TabTome-Setup-*.exe
+            outputs/TabTome-Setup-*.exe.sha256
+            outputs/SHA256SUMS-*.txt
+          if-no-files-found: error
+          retention-days: 14

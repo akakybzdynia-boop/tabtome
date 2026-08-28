@@ -5,11 +5,22 @@ const grayscale = document.querySelector<HTMLInputElement>("#grayscale")!;
 const senderEmail = document.querySelector<HTMLInputElement>("#sender-email")!;
 const kindleEmail = document.querySelector<HTMLInputElement>("#kindle-email")!;
 const amazonApproved = document.querySelector<HTMLInputElement>("#amazon-approved")!;
+const pocketBookEmail = document.querySelector<HTMLInputElement>("#pocketbook-email")!;
+const pocketBookApproved = document.querySelector<HTMLInputElement>("#pocketbook-approved")!;
+const defaultDestination = document.querySelector<HTMLSelectElement>("#default-destination")!;
+const uiLanguage = document.querySelector<HTMLSelectElement>("#ui-language")!;
 
+type DestinationId = "kindle" | "pocketbook";
+type DeliveryDestination = {
+  id: DestinationId;
+  kind: DestinationId;
+  email: string;
+  senderApproved: boolean;
+};
 type NativeSettings = {
   senderEmail: string;
-  kindleEmail: string;
-  amazonSenderApproved: boolean;
+  destinations: DeliveryDestination[];
+  defaultDestinationId: DestinationId;
   passwordConfigured: boolean;
   passwordProtected: boolean;
 };
@@ -53,37 +64,92 @@ function setCheck(name: string, state: "ok" | "error" | "pending", text: string)
   item.replaceChildren(icon, label);
 }
 
-function renderChecklist(hostOk: boolean, settings?: NativeSettings) {
-  setCheck("host", hostOk ? "ok" : "error", hostOk ? "Локальный компонент подключён" : "Локальный компонент недоступен");
-  const addressesOk = Boolean(settings?.senderEmail && settings?.kindleEmail);
-  setCheck("addresses", addressesOk ? "ok" : "error", addressesOk ? "Адреса почты указаны" : "Укажите оба адреса почты");
-  setCheck("password", settings?.passwordProtected ? "ok" : "error", settings?.passwordProtected
-    ? "Пароль приложения защищён Windows"
-    : "Пароль приложения не настроен");
-  setCheck("amazon", settings?.amazonSenderApproved ? "ok" : "error", settings?.amazonSenderApproved
-    ? "Адрес отправителя разрешён в Amazon"
-    : "Подтвердите разрешение адреса в Amazon");
-  setCheck("smtp", "pending", "SMTP ещё не проверен");
+function formDestinations(): DeliveryDestination[] {
+  const destinations: DeliveryDestination[] = [];
+  const kindle = kindleEmail.value.trim();
+  const pocketbook = pocketBookEmail.value.trim();
+  if (kindle) destinations.push({ id: "kindle", kind: "kindle", email: kindle, senderApproved: amazonApproved.checked });
+  if (pocketbook) destinations.push({ id: "pocketbook", kind: "pocketbook", email: pocketbook, senderApproved: pocketBookApproved.checked });
+  return destinations;
 }
 
-function validateAddresses() {
-  if (!senderEmail.reportValidity() || !kindleEmail.reportValidity()) return false;
-  return true;
+function formSettings(): NativeSettings {
+  return {
+    senderEmail: senderEmail.value.trim(),
+    destinations: formDestinations(),
+    defaultDestinationId: defaultDestination.value as DestinationId,
+    passwordConfigured: Boolean(currentSettings?.passwordConfigured),
+    passwordProtected: Boolean(currentSettings?.passwordProtected)
+  };
+}
+
+function updateDefaultOptions() {
+  const ids = new Set(formDestinations().map(destination => destination.id));
+  for (const option of defaultDestination.options) option.disabled = !ids.has(option.value as DestinationId);
+  if (!ids.has(defaultDestination.value as DestinationId)) {
+    defaultDestination.value = ids.has("kindle") ? "kindle" : ids.has("pocketbook") ? "pocketbook" : "kindle";
+  }
+}
+
+function renderChecklist(hostOk: boolean, settings?: NativeSettings) {
+  setCheck("host", hostOk ? "ok" : "error", ptMessage(hostOk ? "host_connected" : "host_unavailable"));
+  const targets = settings?.destinations || formDestinations();
+  const addressesOk = Boolean((settings?.senderEmail || senderEmail.value.trim()) && targets.length);
+  setCheck("addresses", addressesOk ? "ok" : "error", addressesOk
+    ? ptMessage("configured_recipients", [ptFormatNumber(targets.length)])
+    : ptMessage("configure_addresses"));
+  setCheck("password", settings?.passwordProtected ? "ok" : "error", settings?.passwordProtected
+    ? ptMessage("password_protected")
+    : ptMessage("password_missing"));
+  const approvalsOk = targets.length > 0 && targets.every(destination => destination.senderApproved);
+  setCheck("approvals", approvalsOk ? "ok" : "error", approvalsOk
+    ? ptMessage("approvals_ready")
+    : ptMessage("approvals_missing"));
+  setCheck("smtp", "pending", ptMessage("smtp_not_checked"));
+}
+
+function validateSettings() {
+  if (!senderEmail.reportValidity() || !kindleEmail.reportValidity() || !pocketBookEmail.reportValidity()) return undefined;
+  const destinations = formDestinations();
+  if (!destinations.length) { show(ptMessage("enter_recipient")); return undefined; }
+  const pocketbook = destinations.find(destination => destination.kind === "pocketbook");
+  if (pocketbook && !pocketbook.email.toLowerCase().endsWith("@pbsync.com")) {
+    show(ptMessage("invalid_pocketbook_address"));
+    pocketBookEmail.focus();
+    return undefined;
+  }
+  if (destinations.some(destination => !destination.senderApproved)) {
+    show(ptMessage("confirm_allowlists"));
+    return undefined;
+  }
+  updateDefaultOptions();
+  return destinations;
 }
 
 async function init() {
-  const stored = await browser.storage.local.get("grayscaleImages");
+  const stored = await browser.storage.local.get(["grayscaleImages", PT_UI_LANGUAGE_KEY]);
   grayscale.checked = stored.grayscaleImages !== false;
+  uiLanguage.value = stored[PT_UI_LANGUAGE_KEY] === "ru" || stored[PT_UI_LANGUAGE_KEY] === "en"
+    ? String(stored[PT_UI_LANGUAGE_KEY])
+    : "auto";
   renderChecklist(false);
   try {
     const data = await browser.runtime.sendMessage({ type: "native-settings-get" }) as NativeReply;
-    if (!data?.ok || !data.settings) throw new Error(data?.error || "Локальный компонент не поддерживает настройки адресов. Обновите его до версии 0.9.1.");
+    if (!data?.ok || !data.settings) throw new Error(data?.error || ptMessage("destination_support_upgrade"));
     hostAvailable = true;
     currentSettings = data.settings;
     senderEmail.value = data.settings.senderEmail;
-    kindleEmail.value = data.settings.kindleEmail;
-    amazonApproved.checked = data.settings.amazonSenderApproved;
-    approvedSenderEmail = data.settings.amazonSenderApproved ? data.settings.senderEmail.toLowerCase() : "";
+    const kindle = data.settings.destinations.find(destination => destination.kind === "kindle");
+    const pocketbook = data.settings.destinations.find(destination => destination.kind === "pocketbook");
+    kindleEmail.value = kindle?.email || "";
+    amazonApproved.checked = Boolean(kindle?.senderApproved);
+    pocketBookEmail.value = pocketbook?.email || "";
+    pocketBookApproved.checked = Boolean(pocketbook?.senderApproved);
+    defaultDestination.value = data.settings.defaultDestinationId;
+    approvedSenderEmail = data.settings.destinations.every(destination => destination.senderApproved)
+      ? data.settings.senderEmail.toLowerCase()
+      : "";
+    updateDefaultOptions();
     renderChecklist(true, data.settings);
   } catch (error) {
     hostAvailable = false;
@@ -93,38 +159,39 @@ async function init() {
 }
 
 save.addEventListener("click", async () => {
-  if (!validateAddresses()) return;
+  const destinations = validateSettings();
+  if (!destinations) return;
   save.disabled = true;
   loadTest.disabled = true;
-  show("Сохраняю адреса и проверяю SMTP…");
+  show(ptMessage("saving_settings"));
   try {
     await browser.storage.local.set({ grayscaleImages: grayscale.checked });
     const saved = await browser.runtime.sendMessage({
       type: "native-settings-save",
       senderEmail: senderEmail.value.trim(),
-      kindleEmail: kindleEmail.value.trim(),
-      amazonSenderApproved: amazonApproved.checked
+      destinations,
+      defaultDestinationId: defaultDestination.value
     }) as NativeReply;
     if (!saved?.ok || !saved.settings) {
       if (saved?.code?.startsWith("NATIVE_")) hostAvailable = false;
-      throw new Error(saved?.error || "Не удалось сохранить настройки.");
+      throw new Error(saved?.error || ptMessage("settings_save_failed"));
     }
     hostAvailable = true;
     currentSettings = saved.settings;
-    approvedSenderEmail = saved.settings.amazonSenderApproved ? saved.settings.senderEmail.toLowerCase() : "";
+    approvedSenderEmail = saved.settings.senderEmail.toLowerCase();
     renderChecklist(true, currentSettings);
-    if (!saved.configOk) throw new Error(saved.error || "Настройки сохранены, но конфигурация локального компонента неполна.");
+    if (!saved.configOk) throw new Error(saved.error || ptMessage("settings_incomplete"));
 
     const diagnostic = await browser.runtime.sendMessage({ type: "native-diagnostics" }) as NativeReply;
     if (!diagnostic?.ok) {
       if (diagnostic?.code?.startsWith("NATIVE_")) hostAvailable = false;
-      throw new Error(diagnostic?.error || "SMTP-проверка завершилась ошибкой.");
+      throw new Error(diagnostic?.error || ptMessage("smtp_check_failed"));
     }
-    setCheck("smtp", "ok", "SMTP-соединение работает");
-    show(`Настройки сохранены. Локальный компонент v${diagnostic.hostVersion || "0.9.1"} и SMTP работают.`, true);
+    setCheck("smtp", "ok", ptMessage("smtp_working"));
+    show(ptMessage("settings_saved", [diagnostic.hostVersion || "0.11.1"]), true);
   } catch (error) {
     renderChecklist(hostAvailable, currentSettings);
-    setCheck("smtp", "error", "SMTP-проверка не пройдена");
+    setCheck("smtp", "error", ptMessage("smtp_not_working"));
     show(error instanceof Error ? error.message : String(error));
   } finally {
     save.disabled = false;
@@ -132,30 +199,40 @@ save.addEventListener("click", async () => {
   }
 });
 
+function onRecipientInput() {
+  updateDefaultOptions();
+  renderChecklist(hostAvailable, formSettings());
+}
+
 senderEmail.addEventListener("input", () => {
-  if (senderEmail.value.trim().toLowerCase() !== approvedSenderEmail) amazonApproved.checked = false;
-  setCheck("addresses", senderEmail.validity.valid && kindleEmail.validity.valid && Boolean(senderEmail.value && kindleEmail.value) ? "ok" : "error",
-    senderEmail.validity.valid && kindleEmail.validity.valid && Boolean(senderEmail.value && kindleEmail.value) ? "Адреса почты указаны" : "Укажите оба адреса почты");
-  setCheck("amazon", amazonApproved.checked ? "ok" : "error", amazonApproved.checked ? "Адрес отправителя разрешён в Amazon" : "Подтвердите разрешение адреса в Amazon");
+  if (senderEmail.value.trim().toLowerCase() !== approvedSenderEmail) {
+    amazonApproved.checked = false;
+    pocketBookApproved.checked = false;
+  }
+  renderChecklist(hostAvailable, formSettings());
 });
-kindleEmail.addEventListener("input", () => {
-  const valid = senderEmail.validity.valid && kindleEmail.validity.valid && Boolean(senderEmail.value && kindleEmail.value);
-  setCheck("addresses", valid ? "ok" : "error", valid ? "Адреса почты указаны" : "Укажите оба адреса почты");
-});
+kindleEmail.addEventListener("input", onRecipientInput);
+pocketBookEmail.addEventListener("input", onRecipientInput);
 amazonApproved.addEventListener("change", () => {
-  approvedSenderEmail = amazonApproved.checked ? senderEmail.value.trim().toLowerCase() : "";
-  setCheck("amazon", amazonApproved.checked ? "ok" : "error", amazonApproved.checked ? "Адрес отправителя разрешён в Amazon" : "Подтвердите разрешение адреса в Amazon");
+  approvedSenderEmail = amazonApproved.checked && (!pocketBookEmail.value.trim() || pocketBookApproved.checked)
+    ? senderEmail.value.trim().toLowerCase() : "";
+  renderChecklist(hostAvailable, formSettings());
+});
+pocketBookApproved.addEventListener("change", () => {
+  approvedSenderEmail = pocketBookApproved.checked && (!kindleEmail.value.trim() || amazonApproved.checked)
+    ? senderEmail.value.trim().toLowerCase() : "";
+  renderChecklist(hostAvailable, formSettings());
 });
 
 loadTest.addEventListener("click", async () => {
   save.disabled = true;
   loadTest.disabled = true;
-  show("Передаю тестовые 20 МБ через Firefox…");
+  show(ptMessage("testing_20mb"));
   try {
     const data = await browser.runtime.sendMessage({ type: "native-load-test" }) as NativeReply;
-    if (!data?.ok) throw new Error(data?.error || "Нагрузочная проверка завершилась ошибкой.");
+    if (!data?.ok) throw new Error(data?.error || ptMessage("load_test_failed"));
     const megabytes = ((data.payloadBytes || 0) / 1024 / 1024).toFixed(0);
-    show(`Канал Firefox → локальный компонент передал ${megabytes} МБ за ${data.elapsedMs || 0} мс.`, true);
+    show(ptMessage("load_test_success", [megabytes, ptFormatNumber(data.elapsedMs || 0)]), true);
   } catch (error) {
     show(error instanceof Error ? error.message : String(error));
   } finally {
@@ -164,4 +241,10 @@ loadTest.addEventListener("click", async () => {
   }
 });
 
-void init();
+uiLanguage.addEventListener("change", async () => {
+  const setting = uiLanguage.value as PtUiLanguage;
+  await browser.storage.local.set({ [PT_UI_LANGUAGE_KEY]: setting });
+  location.reload();
+});
+
+void ptInitializeI18n().then(init).catch(error => show(error instanceof Error ? error.message : String(error)));

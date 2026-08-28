@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $projectRoot = $PSScriptRoot
 $extensionDirectory = Join-Path $projectRoot "extension\dist"
-$launcher = Join-Path $projectRoot "host\PageToEreaderHost.exe"
+$launcher = Join-Path $projectRoot "host\TabTomeHost.exe"
 $testScript = Join-Path $projectRoot "scripts\test-firefox-native-load.mjs"
 $hostName = "page_to_ereader_local"
 $registryPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\$hostName"
@@ -25,7 +25,7 @@ $previousManifest = if ($hadRegistryKey) { (Get-Item -LiteralPath $registryPath)
 try {
     $nativeManifest = [ordered]@{
         name = $hostName
-        description = "Page to E-reader Local automated Firefox test"
+        description = "TabTome automated Firefox test"
         path = $launcher
         type = "stdio"
         allowed_extensions = @("page-to-ereader-local@local")

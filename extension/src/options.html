@@ -1,47 +1,73 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Настройки Page to E-reader Local</title>
+  <title>TabTome settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
-<body>
+<body data-i18n-document-title="settings_document_title">
   <main>
-    <h1>Настройки отправки</h1>
-    <p class="intro">Адреса хранятся только в локальном компоненте на этом компьютере. Пароль почты расширению недоступен.</p>
+    <h1 data-i18n="settings_title">Delivery settings</h1>
+    <p class="intro" data-i18n="settings_intro">The TabTome app builds the EPUB and sends it through your configured email account. Your addresses and password stay on this computer.</p>
+
+    <section aria-labelledby="interface-heading">
+      <h2 id="interface-heading" data-i18n="interface_heading">Interface</h2>
+      <label for="ui-language" data-i18n="language_label">Language</label>
+      <select id="ui-language">
+        <option value="auto" data-i18n="language_auto">Automatic (browser language)</option>
+        <option value="ru" data-i18n="language_russian">Русский</option>
+        <option value="en" data-i18n="language_english">English</option>
+      </select>
+      <p class="field-note" data-i18n="language_note">The language applies to the popup, settings, context menu, and extension status messages.</p>
+    </section>
 
     <section aria-labelledby="addresses-heading">
-      <h2 id="addresses-heading">Почта</h2>
-      <label for="sender-email">Адрес отправителя</label>
+      <h2 id="addresses-heading" data-i18n="email_heading">Email</h2>
+      <label for="sender-email" data-i18n="sender_address">Sender address</label>
       <input id="sender-email" type="email" autocomplete="email" placeholder="name@gmail.com" required>
-      <label for="kindle-email">Адрес Send to Kindle</label>
-      <input id="kindle-email" type="email" autocomplete="off" placeholder="name@kindle.com" required>
-      <label class="check"><input id="amazon-approved" type="checkbox">Адрес отправителя добавлен в список разрешённых адресов Amazon</label>
+      <div class="service-block">
+        <h3>Kindle</h3>
+        <label for="kindle-email" data-i18n="send_to_kindle_address">Send to Kindle address</label>
+        <input id="kindle-email" type="email" autocomplete="off" placeholder="name@kindle.com">
+        <label class="check"><input id="amazon-approved" type="checkbox"><span data-i18n="amazon_allowlist">The sender address is on Amazon’s Approved Personal Document E-mail List</span></label>
+      </div>
+      <div class="service-block">
+        <h3>PocketBook</h3>
+        <label for="pocketbook-email" data-i18n="send_to_pocketbook_address">Send-to-PocketBook address</label>
+        <input id="pocketbook-email" type="email" autocomplete="off" placeholder="name@pbsync.com">
+        <label class="check"><input id="pocketbook-approved" type="checkbox"><span data-i18n="pocketbook_allowlist">The sender address is on the Send-to-PocketBook allowlist</span></label>
+      </div>
+      <label for="default-destination" data-i18n="default_recipient">Default recipient</label>
+      <select id="default-destination">
+        <option value="kindle">Kindle</option>
+        <option value="pocketbook">PocketBook</option>
+      </select>
+      <p class="field-note" data-i18n="recipient_note">Leave an unused address empty. Configure at least one recipient.</p>
     </section>
 
     <section aria-labelledby="book-heading">
-      <h2 id="book-heading">Книга</h2>
-      <label class="check"><input id="grayscale" type="checkbox">Преобразовывать изображения в оттенки серого для Paperwhite</label>
+      <h2 id="book-heading" data-i18n="book_heading">Book</h2>
+      <label class="check"><input id="grayscale" type="checkbox"><span data-i18n="grayscale_images">Convert images to grayscale for Paperwhite</span></label>
     </section>
 
     <section aria-labelledby="setup-heading">
-      <h2 id="setup-heading">Готовность</h2>
+      <h2 id="setup-heading" data-i18n="readiness_heading">Readiness</h2>
       <ul id="checklist" class="checklist" aria-live="polite">
-        <li data-check="host">Локальный компонент</li>
-        <li data-check="addresses">Адреса почты</li>
-        <li data-check="password">Пароль приложения</li>
-        <li data-check="amazon">Разрешение Amazon</li>
+        <li data-check="host" data-i18n="check_companion">TabTome app</li>
+        <li data-check="addresses" data-i18n="check_addresses">Email addresses</li>
+        <li data-check="password" data-i18n="check_password">App password</li>
+        <li data-check="approvals" data-i18n="check_approvals">Recipient allowlists</li>
         <li data-check="smtp">SMTP</li>
       </ul>
     </section>
 
     <div class="buttons">
-      <button id="save">Сохранить и проверить SMTP</button>
-      <button id="load-test" class="secondary">Проверить канал 20 МБ</button>
+      <button id="save" data-i18n="save_and_check">Save and check SMTP</button>
+      <button id="load-test" class="secondary" data-i18n="test_20mb">Test 20 MB channel</button>
     </div>
     <p id="result" role="status" aria-live="polite"></p>
-    <p class="note">Если пароль приложения не настроен, запустите <code>protect-smtp-password.ps1</code> из папки проекта. Тест 20 МБ проверяет связь Firefox с локальным компонентом и ничего не отправляет на Kindle.</p>
+    <p class="note" data-i18n="settings_note">If the app password is not configured, open TabTome from the Windows Start menu. The 20 MB test checks the browser-to-companion connection and does not send a book.</p>
   </main>
   <script src="options.js"></script>
 </body>

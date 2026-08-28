@@ -19,11 +19,14 @@ describe("native host process", () => {
     for (const directory of directories.splice(0)) rmSync(directory, { recursive: true, force: true });
   });
 
-  async function runHost(serverRoot: string, message: unknown) {
+  async function runHost(serverRoot: string, message: unknown, dataRoot?: string) {
     const entry = fileURLToPath(new URL("../dist/native-host.js", import.meta.url));
+    const environment = { ...process.env, PAGE_TO_EREADER_SERVER_ROOT: serverRoot };
+    delete environment.PAGE_TO_EREADER_DATA_ROOT;
+    if (dataRoot) environment.PAGE_TO_EREADER_DATA_ROOT = dataRoot;
     const child = spawn(process.execPath, [entry], {
       cwd: tmpdir(),
-      env: { ...process.env, PAGE_TO_EREADER_SERVER_ROOT: serverRoot },
+      env: environment,
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true
     });
@@ -58,12 +61,31 @@ describe("native host process", () => {
       requestId: "health-test",
       type: "result",
       ok: true,
-      hostVersion: "0.9.1",
-      protocolVersion: 1,
-      capabilities: ["tabs", "pastedText", "pastedRichText", "emailSettings"]
+      hostVersion: "0.11.1",
+      protocolVersion: 2,
+      capabilities: ["tabs", "pastedText", "pastedRichText", "emailSettings", "deliveryTargets"]
     })]);
     expect(existsSync(join(serverRoot, ".smtp-pass"))).toBe(true);
     expect(readFileSync(join(serverRoot, ".env"), "utf8")).not.toContain("SMTP_PASS");
+  }, 20_000);
+
+  it("keeps installed application files separate from mutable user data", async () => {
+    const serverRoot = makeRoot();
+    const dataRoot = makeRoot();
+    writeFileSync(join(dataRoot, ".env"), [
+      "SMTP_HOST=smtp.example.com",
+      "SMTP_PORT=587",
+      "SMTP_SECURE=false",
+      "SMTP_USER=sender@example.com",
+      "SMTP_FROM=sender@example.com",
+      "KINDLE_EMAIL=reader@kindle.com"
+    ].join("\n"), "utf8");
+    writeFileSync(join(dataRoot, ".smtp-pass"), "lazy-dpapi-placeholder", "utf8");
+
+    const health = await runHost(serverRoot, { requestId: "separate-data", type: "health" }, dataRoot);
+    expect(health).toEqual([expect.objectContaining({ requestId: "separate-data", ok: true })]);
+    expect(existsSync(join(dataRoot, "data", "jobs"))).toBe(true);
+    expect(existsSync(join(serverRoot, "data"))).toBe(false);
   }, 20_000);
 
   it("reads and saves email settings even while SMTP configuration is incomplete", async () => {
@@ -73,28 +95,34 @@ describe("native host process", () => {
       requestId: "settings-initial",
       type: "result",
       ok: true,
-      settings: expect.objectContaining({ senderEmail: "", kindleEmail: "", passwordConfigured: false })
+      settings: expect.objectContaining({ senderEmail: "", destinations: [], defaultDestinationId: "kindle", passwordConfigured: false })
     })]);
 
     const saved = await runHost(serverRoot, {
       requestId: "settings-save",
       type: "settings-save",
       senderEmail: "sender@example.com",
-      kindleEmail: "reader@kindle.com",
-      amazonSenderApproved: true
+      destinations: [
+        { id: "kindle", kind: "kindle", email: "reader@kindle.com", senderApproved: true },
+        { id: "pocketbook", kind: "pocketbook", email: "reader@pbsync.com", senderApproved: true }
+      ],
+      defaultDestinationId: "pocketbook"
     });
     expect(saved).toEqual([expect.objectContaining({
       requestId: "settings-save",
       type: "result",
       ok: true,
       configOk: false,
-      settings: expect.objectContaining({ senderEmail: "sender@example.com", kindleEmail: "reader@kindle.com" })
+      settings: expect.objectContaining({ senderEmail: "sender@example.com", defaultDestinationId: "pocketbook" })
     })]);
 
     const current = await runHost(serverRoot, { requestId: "settings-current", type: "settings-get" });
     expect(current).toEqual([expect.objectContaining({
       requestId: "settings-current",
-      settings: expect.objectContaining({ senderEmail: "sender@example.com", amazonSenderApproved: true })
+      settings: expect.objectContaining({
+        senderEmail: "sender@example.com",
+        destinations: expect.arrayContaining([expect.objectContaining({ kind: "pocketbook", email: "reader@pbsync.com" })])
+      })
     })]);
   }, 20_000);
 

@@ -1,9 +1,13 @@
 import { Readability } from "@mozilla/readability";
 
 (() => {
+  const page = globalThis as typeof globalThis & { __firefoxToKindleArticle?: unknown };
   const documentClone = document.cloneNode(true) as Document;
   const parsed = new Readability(documentClone, { charThreshold: 100 }).parse();
-  if (!parsed?.content) throw new Error("Не удалось распознать статью на странице");
+  if (!parsed?.content) {
+    page.__firefoxToKindleArticle = { error: "ARTICLE_NOT_RECOGNIZED" };
+    return;
+  }
   const template = document.createElement("template");
   template.innerHTML = parsed.content;
   const imageSources: Array<{ id: string; url: string; alt: string }> = [];
@@ -28,7 +32,7 @@ import { Readability } from "@mozilla/readability";
       imageSources.push({ id, url: url.href, alt: image.getAttribute("alt") || "" });
     } catch { image.remove(); }
   }
-  (globalThis as typeof globalThis & { __firefoxToKindleArticle?: unknown }).__firefoxToKindleArticle = {
+  page.__firefoxToKindleArticle = {
     title: parsed.title || document.title || location.hostname,
     byline: parsed.byline,
     siteName: parsed.siteName,

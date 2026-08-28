@@ -6,8 +6,7 @@ const schema = z.object({
   SMTP_SECURE: z.enum(["true", "false"]).default("false").transform(v => v === "true"),
   SMTP_USER: z.string().min(1),
   SMTP_PASS: z.string().min(1),
-  SMTP_FROM: z.string().email(),
-  KINDLE_EMAIL: z.string().email()
+  SMTP_FROM: z.string().email()
 });
 
 export function loadConfig(env: NodeJS.ProcessEnv) {

@@ -8,12 +8,12 @@ import { readNativeMessages, writeNativeMessage } from "./native-protocol.js";
 import { errorCode, SendService } from "./send-service.js";
 import { loadConfig } from "./config.js";
 import { loadSmtpEnvironment, migratePlaintextSmtpPassword } from "./smtp-password.js";
-import { SettingsStore } from "./settings-store.js";
-import { ENV_FILE, JOB_DIRECTORY, PROTECTED_SMTP_PASSWORD_FILE, SERVER_ROOT, USER_SETTINGS_FILE } from "./paths.js";
+import { deliveryDestinationSchema, SettingsStore } from "./settings-store.js";
+import { DATA_ROOT, ENV_FILE, JOB_DIRECTORY, PROTECTED_SMTP_PASSWORD_FILE, USER_SETTINGS_FILE } from "./paths.js";
 
-const HOST_VERSION = "0.9.1";
-const PROTOCOL_VERSION = 1;
-const CAPABILITIES = ["tabs", "pastedText", "pastedRichText", "emailSettings"] as const;
+const HOST_VERSION = "0.11.1";
+const PROTOCOL_VERSION = 2;
+const CAPABILITIES = ["tabs", "pastedText", "pastedRichText", "emailSettings", "deliveryTargets"] as const;
 const envelope = z.object({
   requestId: z.string().min(1).max(100),
   type: z.enum(["health", "smtp-check", "job-status", "settings-get", "settings-save", "send"])
@@ -21,13 +21,14 @@ const envelope = z.object({
 const jobCommand = z.object({ jobId: z.string().uuid() });
 const saveSettingsCommand = z.object({
   senderEmail: z.string().trim().email(),
-  kindleEmail: z.string().trim().email(),
-  amazonSenderApproved: z.boolean()
+  destinations: z.array(deliveryDestinationSchema).min(1).max(2),
+  defaultDestinationId: z.enum(["kindle", "pocketbook"])
 });
+const sendDestinationCommand = z.object({ destinationId: z.enum(["kindle", "pocketbook"]) });
 
 let passwordMigrationError: Error | undefined;
 try {
-  const migration = migratePlaintextSmtpPassword(SERVER_ROOT);
+  const migration = migratePlaintextSmtpPassword(DATA_ROOT);
   if (migration.migrated) log("SMTP password migrated from .env to Windows DPAPI");
   else if (migration.removedPlaintext) log("Redundant SMTP_PASS removed from .env");
 } catch (error) {
@@ -62,7 +63,7 @@ refreshConfiguration();
 function getService() {
   if (startupError) throw startupError;
   if (!service) {
-    const environment = settings.apply(loadSmtpEnvironment(baseEnvironment, SERVER_ROOT));
+    const environment = settings.apply(loadSmtpEnvironment(baseEnvironment, DATA_ROOT));
     service = new SendService(createMailer(loadConfig(environment)), jobs);
   }
   return service;
@@ -122,7 +123,9 @@ async function handle(raw: unknown) {
   if (command.type === "smtp-check") {
     return response(requestId, { type: "result", ...(await getService().smtpCheck()) });
   }
-  const result = await getService().send(command, update => response(requestId, { type: "progress", ...update }));
+  const { destinationId } = sendDestinationCommand.parse(command);
+  const destination = settings.destination(baseEnvironment, destinationId);
+  const result = await getService().send(command, destination, update => response(requestId, { type: "progress", ...update }));
   return response(requestId, { type: "result", ...result });
 }
 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+    <parameter name="fileVersion" required="true" />
+  </parameters>
+  <zip-file>
+    <pe-file path="TabTomeSettings.exe"
+             product-name="TabTome"
+             product-version="${fileVersion}"
+             file-version="${fileVersion}"
+             company-name="TabTome contributors">
+      <authenticode-sign description="TabTome settings"
+                         description-url="https://github.com/akakybzdynia-boop/page-to-ereader-local" />
+    </pe-file>
+    <pe-file path="host/TabTomeHost.exe"
+             product-name="TabTome"
+             product-version="${fileVersion}"
+             file-version="${fileVersion}"
+             company-name="TabTome contributors">
+      <authenticode-sign description="TabTome native messaging host"
+                         description-url="https://github.com/akakybzdynia-boop/page-to-ereader-local" />
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

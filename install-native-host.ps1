@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $hostName = "page_to_ereader_local"
 $projectRoot = $PSScriptRoot
 $hostDirectory = Join-Path $projectRoot "host"
-$hostLauncher = Join-Path $hostDirectory "PageToEreaderHost.exe"
+$hostLauncher = Join-Path $hostDirectory "TabTomeHost.exe"
 $launcherBuilder = Join-Path $projectRoot "build-native-launcher.ps1"
 $hostManifest = Join-Path $hostDirectory "manifest.json"
 $entryPoint = Join-Path $projectRoot "server\dist\native-host.js"
@@ -17,7 +17,7 @@ $obsoleteSourceFiles = @(
     "server\src\index.ts"
 )
 
-Write-Host "Installing Page to E-reader Local native host..."
+Write-Host "Installing TabTome native host..."
 
 if (-not (Get-Command node.exe -ErrorAction SilentlyContinue)) {
     throw "Node.js is not installed or is not available in PATH."
@@ -61,7 +61,7 @@ if (-not (Test-Path -LiteralPath $hostLauncher -PathType Leaf)) {
 
 $manifest = [ordered]@{
     name = $hostName
-    description = "Page to E-reader Local native host"
+    description = "TabTome native host"
     path = $hostLauncher
     type = "stdio"
     allowed_extensions = @("page-to-ereader-local@local")

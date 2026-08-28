@@ -4,12 +4,19 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const executable = join(root, "host", "PageToEreaderHost.exe");
+const executable = join(root, "host", "TabTomeHost.exe");
 const image = readFileSync(executable);
 const peOffset = image.readUInt32LE(0x3c);
 const optionalHeader = peOffset + 24;
 const subsystem = image.readUInt16LE(optionalHeader + 68);
 if (subsystem !== 2) throw new Error(`Native launcher is not a Windows GUI executable (subsystem ${subsystem}).`);
+
+const settingsExecutable = join(root, "host", "TabTomeSettings.exe");
+const settingsImage = readFileSync(settingsExecutable);
+const settingsPeOffset = settingsImage.readUInt32LE(0x3c);
+const settingsOptionalHeader = settingsPeOffset + 24;
+const settingsSubsystem = settingsImage.readUInt16LE(settingsOptionalHeader + 68);
+if (settingsSubsystem !== 2) throw new Error(`Settings application is not a Windows GUI executable (subsystem ${settingsSubsystem}).`);
 
 const request = Buffer.from(JSON.stringify({ requestId: "launcher-test", type: "health" }), "utf8");
 const header = Buffer.alloc(4);
@@ -30,7 +37,7 @@ if (output.length < 4) throw new Error("Native launcher returned no protocol fra
 const length = output.readUInt32LE(0);
 if (output.length !== length + 4) throw new Error("Native launcher polluted or truncated protocol stdout.");
 const response = JSON.parse(output.subarray(4).toString("utf8"));
-if (response.requestId !== "launcher-test" || response.hostVersion !== "0.9.1" || response.protocolVersion !== 1 || !response.capabilities?.includes("pastedRichText") || !response.capabilities?.includes("emailSettings")) {
+if (response.requestId !== "launcher-test" || response.hostVersion !== "0.11.1" || response.protocolVersion !== 2 || !response.capabilities?.includes("pastedRichText") || !response.capabilities?.includes("emailSettings") || !response.capabilities?.includes("deliveryTargets")) {
   throw new Error(`Unexpected native launcher response: ${JSON.stringify(response)}`);
 }
 process.stdout.write("Windowless native launcher and protocol forwarding: OK\n");

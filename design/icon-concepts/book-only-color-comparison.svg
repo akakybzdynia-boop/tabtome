@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 410" role="img" aria-label="Сравнение цветовых вариантов иконки с открытой книгой">
+  <rect width="860" height="410" fill="#f4f7fa"/>
+  <style>
+    .card{fill:#fff;stroke:#c9d4df;stroke-width:1}.title{font:600 19px system-ui,sans-serif;fill:#102a43}.note{font:14px system-ui,sans-serif;fill:#52667a}.ratio{font:600 13px system-ui,sans-serif;fill:#243b53}.size{font:12px system-ui,sans-serif;fill:#72859a;text-anchor:middle}
+  </style>
+
+  <g transform="translate(20 20)">
+    <rect class="card" width="260" height="350" rx="16"/>
+    <text class="title" x="20" y="34">1. Чёрно-белая</text>
+    <text class="ratio" x="20" y="58">Контраст 18,88:1</text>
+    <g transform="translate(66 78) scale(2)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#0b0b0c"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#fff"/><path d="M32 23v33" stroke="#0b0b0c" stroke-width="2.5"/></g>
+    <g transform="translate(56 238)"><g transform="scale(.5)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#0b0b0c"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#fff"/><path d="M32 23v33" stroke="#0b0b0c" stroke-width="2.5"/></g><text class="size" x="16" y="49">32</text></g>
+    <g transform="translate(120 246)"><g transform="scale(.25)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#0b0b0c"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#fff"/><path d="M32 23v33" stroke="#0b0b0c" stroke-width="2.5"/></g><text class="size" x="8" y="41">16</text></g>
+    <text class="note" x="20" y="322">Максимальная читаемость.</text><text class="note" x="20" y="342">Нейтрально, но без характера.</text>
+  </g>
+
+  <g transform="translate(300 20)">
+    <rect class="card" width="260" height="350" rx="16"/>
+    <text class="title" x="20" y="34">2. Красно-чёрная</text>
+    <text class="ratio" x="20" y="58">Контраст 5,55:1</text>
+    <g transform="translate(66 78) scale(2)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#0b0b0c"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#ff3b30"/><path d="M32 23v33" stroke="#0b0b0c" stroke-width="2.5"/></g>
+    <g transform="translate(56 238)"><g transform="scale(.5)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#0b0b0c"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#ff3b30"/><path d="M32 23v33" stroke="#0b0b0c" stroke-width="2.5"/></g><text class="size" x="16" y="49">32</text></g>
+    <g transform="translate(120 246)"><g transform="scale(.25)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#0b0b0c"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#ff3b30"/><path d="M32 23v33" stroke="#0b0b0c" stroke-width="2.5"/></g><text class="size" x="8" y="41">16</text></g>
+    <text class="note" x="20" y="322">Резкая и заметная.</text><text class="note" x="20" y="342">Красный может читаться как ошибка.</text>
+  </g>
+
+  <g transform="translate(580 20)">
+    <rect class="card" width="260" height="350" rx="16"/>
+    <text class="title" x="20" y="34">3. Дополняющие</text>
+    <text class="ratio" x="20" y="58">Контраст 7,55:1</text>
+    <g transform="translate(66 78) scale(2)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#003049"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#ffb000"/><path d="M32 23v33" stroke="#003049" stroke-width="2.5"/></g>
+    <g transform="translate(56 238)"><g transform="scale(.5)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#003049"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#ffb000"/><path d="M32 23v33" stroke="#003049" stroke-width="2.5"/></g><text class="size" x="16" y="49">32</text></g>
+    <g transform="translate(120 246)"><g transform="scale(.25)"><rect x="1" y="1" width="62" height="62" rx="14" fill="#003049"/><path d="M7 15c9-2 18 1 25 8v33c-7-6-16-8-25-6zM57 15c-9-2-18 1-25 8v33c7-6 16-8 25-6z" fill="#ffb000"/><path d="M32 23v33" stroke="#003049" stroke-width="2.5"/></g><text class="size" x="8" y="41">16</text></g>
+    <text class="note" x="20" y="322">Тёмно-синий + оранжевый.</text><text class="note" x="20" y="342">Контрастно, без сигнала ошибки.</text>
+  </g>
+</svg>

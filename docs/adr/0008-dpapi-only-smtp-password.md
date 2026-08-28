@@ -15,7 +15,6 @@ No persistent plaintext backup is created. The original `.env` itself is the rec
 ## Consequences
 
 - upgrades from older releases are automatic on first native-host or diagnostics launch;
-- new installations must run `protect-smtp-password.ps1` under the same non-elevated Windows user as Firefox;
+- the Windows installer launches `TabTomeSettings.exe`, which creates the protected password under the same non-elevated Windows user as Firefox; `protect-smtp-password.ps1` remains only for source-tree installations;
 - copying `.smtp-pass` to another Windows account does not produce a usable credential;
 - malware already running as the same Windows user remains outside the protection DPAPI can provide.
-

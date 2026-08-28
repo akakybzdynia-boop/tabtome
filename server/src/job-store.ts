@@ -18,14 +18,15 @@ export type SendResult = {
   articleCount: number;
   imageCount: number;
   epubBytes: number;
+  destinationId?: string;
 };
 
 export type JobEntry =
-  | { status: "pending"; ts: number }
-  | { status: "sending"; ts: number }
+  | { status: "pending"; ts: number; destinationId?: string }
+  | { status: "sending"; ts: number; destinationId?: string }
   | { status: "completed"; ts: number; result: SendResult }
-  | { status: "failed"; ts: number; error: string }
-  | { status: "interrupted"; ts: number; error: string };
+  | { status: "failed"; ts: number; error: string; destinationId?: string }
+  | { status: "interrupted"; ts: number; error: string; destinationId?: string };
 
 type LockOwner = { pid: number; token: string; createdAt: number };
 
@@ -109,22 +110,22 @@ export class JobStore {
     throw new JobBusyError();
   }
 
-  begin(id: string) { this.transition(id, { status: "pending", ts: Date.now() }); }
-  markSending(id: string) { this.transition(id, { status: "sending", ts: Date.now() }); }
+  begin(id: string, destinationId?: string) { this.transition(id, { status: "pending", ts: Date.now(), destinationId }); }
+  markSending(id: string, destinationId?: string) { this.transition(id, { status: "sending", ts: Date.now(), destinationId }); }
 
   complete(id: string, result: SendResult) {
     try {
       this.transition(id, { status: "completed", ts: Date.now(), result });
     } catch (error) {
-      this.interruptInMemory(id, "SMTP принял письмо, но результат не удалось сохранить. Проверьте библиотеку Kindle.");
+      this.interruptInMemory(id, "SMTP принял письмо, но результат не удалось сохранить. Проверьте библиотеку читалки.", result.destinationId);
       throw error;
     }
   }
 
-  fail(id: string, error: string) { this.transition(id, { status: "failed", ts: Date.now(), error }); }
+  fail(id: string, error: string, destinationId?: string) { this.transition(id, { status: "failed", ts: Date.now(), error, destinationId }); }
 
-  interrupt(id: string, error: string) {
-    const entry: JobEntry = { status: "interrupted", ts: Date.now(), error };
+  interrupt(id: string, error: string, destinationId?: string) {
+    const entry: JobEntry = { status: "interrupted", ts: Date.now(), error, destinationId };
     if (!this.directory) {
       this.memory.set(id, entry);
       return;
@@ -135,14 +136,14 @@ export class JobStore {
 
   private recoverAbandoned(id: string, entry: Extract<JobEntry, { status: "pending" | "sending" }>) {
     const recovered: JobEntry = entry.status === "sending"
-      ? { status: "interrupted", ts: Date.now(), error: "Процесс был остановлен во время SMTP-отправки. Проверьте библиотеку Kindle перед повтором." }
-      : { status: "failed", ts: Date.now(), error: "Процесс был остановлен до начала SMTP-отправки. Задание можно безопасно повторить." };
+      ? { status: "interrupted", ts: Date.now(), error: "Процесс был остановлен во время SMTP-отправки. Проверьте библиотеку читалки перед повтором.", destinationId: entry.destinationId }
+      : { status: "failed", ts: Date.now(), error: "Процесс был остановлен до начала SMTP-отправки. Задание можно безопасно повторить.", destinationId: entry.destinationId };
     this.write(id, recovered);
     return recovered;
   }
 
-  private interruptInMemory(id: string, error: string) {
-    const entry: JobEntry = { status: "interrupted", ts: Date.now(), error };
+  private interruptInMemory(id: string, error: string, destinationId?: string) {
+    const entry: JobEntry = { status: "interrupted", ts: Date.now(), error, destinationId };
     if (!this.directory) {
       this.memory.set(id, entry);
       return;
@@ -189,7 +190,7 @@ export class JobStore {
   private normalizeEntry(id: string, raw: JobEntry): JobEntry {
     const status = (raw as unknown as { status?: string }).status;
     if (status === "processing") {
-      return { status: "interrupted", ts: Date.now(), error: "Незавершённое задание HTTP-версии имеет неопределённый результат. Проверьте Kindle перед повтором." };
+      return { status: "interrupted", ts: Date.now(), error: "Незавершённое задание HTTP-версии имеет неопределённый результат. Проверьте читалку перед повтором." };
     }
     if (!["pending", "sending", "completed", "failed", "interrupted"].includes(String(status))) {
       throw new Error(`Некорректное состояние задания ${id}: ${String(status)}`);
@@ -243,7 +244,7 @@ export class JobStore {
       if (!VALID_ID.test(id) || existsSync(this.jobFile(id))) continue;
       const status = (raw as unknown as { status?: string }).status;
       const entry: JobEntry = status === "processing" || status === "sending"
-        ? { status: "interrupted", ts: Date.now(), error: "Незавершённое задание предыдущей версии имеет неопределённый результат. Проверьте Kindle перед повтором." }
+        ? { status: "interrupted", ts: Date.now(), error: "Незавершённое задание предыдущей версии имеет неопределённый результат. Проверьте читалку перед повтором." }
         : status === "pending"
           ? { status: "failed", ts: Date.now(), error: "Задание предыдущей версии остановилось до SMTP и может быть безопасно повторено." }
           : this.normalizeEntry(id, raw);

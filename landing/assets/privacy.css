@@ -1,0 +1,129 @@
+:root {
+  color-scheme: light;
+  --ink: #171410;
+  --muted: #5d554d;
+  --line: #b9ad9e;
+  --line-strong: #766b60;
+  --paper: #fbf7f2;
+  --paper-deep: #e1d7c3;
+  --wash: #f1e8e1;
+  --navy: #171410;
+  --orange: #ffb000;
+  --link: #5c2e18;
+  --display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--wash); }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--wash);
+  font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a { color: var(--link); text-underline-offset: .16em; }
+a:hover { color: var(--ink); text-decoration-thickness: 2px; }
+a:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.header-inner,
+main,
+.site-footer {
+  width: min(100% - 32px, 840px);
+  margin-inline: auto;
+}
+
+.header-inner {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: .015em;
+}
+
+.language-switch {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.language-switch a,
+.language-switch span {
+  min-width: 42px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.3;
+}
+
+.language-switch span {
+  border-color: var(--paper-deep);
+  background: var(--paper-deep);
+  font-weight: 700;
+}
+
+main {
+  margin-block: 40px;
+  padding: clamp(24px, 5vw, 56px);
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--paper);
+}
+
+h1, h2 { color: var(--ink); font-family: var(--display); font-weight: 650; line-height: 1.15; }
+h1 { margin: 0 0 10px; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.025em; text-wrap: balance; }
+h2 { margin: 2.2em 0 0.65em; font-size: 1.45rem; }
+p, ul { margin-block: 0.8em; }
+li + li { margin-top: 0.35em; }
+.updated, .summary { color: var(--muted); }
+.summary { font-size: 1.08rem; }
+
+.flow {
+  margin: 24px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--line-strong);
+  background: var(--paper-deep);
+}
+
+code {
+  padding: 0.12em 0.35em;
+  border-radius: 2px;
+  background: var(--paper-deep);
+  font: 0.92em ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+.site-footer {
+  padding: 0 0 40px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 520px) {
+  .header-inner { min-height: 62px; }
+  main { width: 100%; margin-block: 0; border: 0; border-radius: 0; box-shadow: none; }
+  .site-footer { padding-top: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
