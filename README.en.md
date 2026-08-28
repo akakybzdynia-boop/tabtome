@@ -40,7 +40,7 @@ Firefox internal pages, built-in PDF pages, and add-on store pages cannot be ext
 
 ## Install on Windows
 
-Public download links will be added when the repository, GitHub Release, privacy page, and AMO listing are published.
+Signed installer download links will be added after SignPath approval and publication of the first GitHub Release. The source repository is public now.
 
 1. Install `TabTome-Setup-0.11.1.exe` as the current Windows user. Administrator rights are not required. A fresh installation uses `%LOCALAPPDATA%\Programs\TabTome` and registers the app for Firefox through the current-user Native Messaging registry key. The legacy data directory and technical IDs are retained during upgrades for compatibility.
 2. Open **TabTome** from the Start menu. Enter the sender address, Kindle and/or PocketBook address, default destination, SMTP settings, and the SMTP app password. For Gmail, use a Google app password rather than the normal account password.

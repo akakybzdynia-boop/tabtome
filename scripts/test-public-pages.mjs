@@ -30,7 +30,7 @@ for (const [locale, html] of Object.entries(pages)) {
     "SMTP",
     "DPAPI",
     "%LOCALAPPDATA%\\PageToEreaderLocal",
-    "github.com/akakybzdynia-boop/page-to-ereader-local/issues"
+    "github.com/akakybzdynia-boop/tabtome/issues"
   ]) {
     if (!html.includes(required)) throw new Error(`${locale} privacy page is missing: ${required}`);
   }

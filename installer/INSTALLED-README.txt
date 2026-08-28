@@ -23,6 +23,6 @@ Project source code license:
   Mozilla Public License 2.0. See LICENSE in the application directory.
 
 Source code:
-  https://github.com/akakybzdynia-boop/page-to-ereader-local
+  https://github.com/akakybzdynia-boop/tabtome
 
 Bundled third-party components remain under the licenses listed in THIRD-PARTY-NOTICES.txt and their package license files.
