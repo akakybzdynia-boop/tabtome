@@ -68,6 +68,7 @@ assert.doesNotMatch(prepareBuildTools, /& \$iscc \/\?/);
 assert.match(packageRelease, /CODE_SIGNING_POLICY\.md/);
 assert.match(packageRelease, /Get-TreeEntries \(Join-Path \$root "\.github"\)/);
 assert.match(packageRelease, /Get-TreeEntries \(Join-Path \$root "\.signpath"\)/);
+assert.match(packageRelease, /\.netlify/);
 assert.match(innoSetup, new RegExp(`#define MyAppVersion "${applicationVersion.replaceAll(".", "\\.")}"`));
 assert.match(innoSetup, new RegExp(`VersionInfoVersion=${fileVersion.replaceAll(".", "\\.")}`));
 for (const source of [launcher, settings]) {

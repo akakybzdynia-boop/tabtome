@@ -55,7 +55,9 @@ function Get-TreeEntries {
     $base = [System.IO.Path]::GetFullPath($Directory)
     Get-ChildItem -LiteralPath $base -Recurse -File | ForEach-Object {
         $relative = $_.FullName.Substring($base.Length).TrimStart("\", "/").Replace("\", "/")
-        [pscustomobject]@{ Source = $_.FullName; Destination = ($Prefix.TrimEnd("/") + "/" + $relative).TrimStart("/") }
+        if ($relative -notmatch '(^|/)\.netlify(/|$)') {
+            [pscustomobject]@{ Source = $_.FullName; Destination = ($Prefix.TrimEnd("/") + "/" + $relative).TrimStart("/") }
+        }
     }
 }
 
