@@ -1,6 +1,6 @@
 # TabTome
 
-[Русская версия](README.md)
+[Русская версия](README.md) · [Website](https://tabtome.netlify.app/en/) · [Privacy policy](https://tabtome.netlify.app/en/privacy/)
 
 TabTome turns one or more pages already open in Firefox, or formatted text pasted by the user, into an EPUB and sends it to Kindle or PocketBook through the user's own SMTP account.
 

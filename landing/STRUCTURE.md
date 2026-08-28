@@ -2,16 +2,16 @@
 
 ## Publication model
 
-- Static HTML, CSS and minimal JavaScript.
+- Static HTML and CSS, with no JavaScript.
 - Netlify deploys the `landing/` directory directly.
 - No build command, analytics, cookies, forms, account system or remote application API.
-- Release files ultimately come from public GitHub Releases; initial links remain explicit placeholders.
+- Release files come from public GitHub Releases; unavailable browser-store links remain disabled controls.
 
 ## Routes
 
 ```text
 /
-  Language handoff: browser-language redirect with visible RU / EN links.
+  Language handoff with visible RU / EN links.
 
 /ru/
   Russian landing page.
@@ -23,7 +23,7 @@
 /en/privacy/
   Privacy policy in both languages.
 
-Status: implemented locally on 18 August 2026. Publication is intentionally pending; AMO must receive the final public HTTPS URL.
+Status: published on 28 August 2026 at `https://tabtome.netlify.app/`. AMO can use the permanent English privacy-policy URL.
 
 /ru/help/
 /en/help/
@@ -33,9 +33,9 @@ Status: implemented locally on 18 August 2026. Publication is intentionally pend
   Bilingual route recovery.
 ```
 
-The landing pages, localized help pages, language handoff, 404 page, privacy pages, shared styles, and three 1280×800 interface screenshots are implemented locally. External publication remains a separate step because the AMO, GitHub Release, support email, and final Netlify URLs are not available yet.
+The landing pages, localized help pages, language handoff, 404 page, privacy pages, shared styles, and three 1280×800 interface screenshots are published on Netlify. A public unsigned GitHub pre-release is available for SignPath review; AMO publication and a signed Windows release remain pending.
 
-Every localized page includes reciprocal `hreflang` links, a visible language switcher that keeps the visitor on the equivalent route, and a canonical URL placeholder to be replaced after the Netlify domain is known.
+Every localized page includes reciprocal absolute `hreflang` links, a visible language switcher that keeps the visitor on the equivalent route, and a canonical `https://tabtome.netlify.app/` URL.
 
 ## Primary landing-page sequence
 
@@ -45,7 +45,7 @@ Every localized page includes reciprocal `hreflang` links, a visible language sw
 - Show the real mechanism as one readable queue: choose articles → build the EPUB locally → open it on the selected e-reader.
 - Primary action: install the supported Firefox extension.
 - Secondary action: download the required Windows companion.
-- State plainly that both parts are required and that public download URLs are not connected yet.
+- State plainly that both parts are required; the Firefox control remains disabled until the public AMO listing is available.
 - State the local-processing advantage in user terms: pages are not uploaded to the developer's server and no TabTome account is required.
 
 ### 2. Demonstration: from tabs to one book
@@ -95,15 +95,15 @@ The steps link to the localized help route for complete instructions.
 - Product name, protocol names, file names and registry paths remain unchanged between languages.
 - Kindle, PocketBook, Firefox, Chrome, Windows and Netlify are compatibility references, not endorsements.
 
-## Pending public URLs
+## Public URLs and pending integrations
 
 ```text
 AMO_FIREFOX_URL
-GITHUB_PROJECT_URL
-GITHUB_INSTALLER_URL
+GITHUB_PROJECT_URL = https://github.com/akakybzdynia-boop/tabtome
+GITHUB_INSTALLER_URL = https://github.com/akakybzdynia-boop/tabtome/releases
 GITHUB_CHROME_ZIP_URL
-SUPPORT_URL
-NETLIFY_SITE_URL
+SUPPORT_URL = https://github.com/akakybzdynia-boop/tabtome/issues
+NETLIFY_SITE_URL = https://tabtome.netlify.app/
 ```
 
 Placeholders must render as unavailable controls or documented preview links; they must never point to `#` while appearing functional.
