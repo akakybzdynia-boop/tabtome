@@ -79,4 +79,8 @@ if (-not (Test-Path -LiteralPath $iscc -PathType Leaf)) {
 
 Write-Host "Pinned build tools are ready."
 & (Join-Path $nodeRuntime "node.exe") --version
-& $iscc /?
+$innoProbe = Start-Process -FilePath $iscc -ArgumentList "/?" -WindowStyle Hidden -Wait -PassThru
+if ($innoProbe.ExitCode -notin @(0, 1)) {
+    throw "Inno Setup compiler probe failed with exit code $($innoProbe.ExitCode)."
+}
+Write-Host "Inno Setup compiler verified."
