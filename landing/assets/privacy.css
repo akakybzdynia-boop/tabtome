@@ -50,12 +50,21 @@ main,
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   color: var(--ink);
   font-family: var(--display);
   font-size: 1.2rem;
   font-weight: 700;
   text-decoration: none;
   letter-spacing: .015em;
+}
+
+.brand img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
 }
 
 .language-switch {

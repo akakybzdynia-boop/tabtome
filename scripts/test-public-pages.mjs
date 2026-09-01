@@ -19,6 +19,7 @@ const publicPages = {
 
 if (!existsSync(join(root, "landing", "assets", "privacy.css"))) throw new Error("Privacy page stylesheet is missing.");
 if (!existsSync(join(root, "landing", "assets", "site.css"))) throw new Error("Public site stylesheet is missing.");
+if (!existsSync(join(root, "landing", "assets", "tabtome-icon.svg"))) throw new Error("Public TabTome icon is missing.");
 
 for (const [locale, html] of Object.entries(pages)) {
   for (const required of [
@@ -64,6 +65,12 @@ for (const [locale, home, help, otherLocale] of [
   if (!help.includes(`href="/${otherLocale}/help/"`)) throw new Error(`${locale} help language switch is incomplete.`);
   for (const required of ['id="benefits"', 'class="value-grid"', 'id="install"']) {
     if (!home.includes(required)) throw new Error(`${locale} home is missing reader-focused section marker: ${required}`);
+  }
+  if (!home.includes('href="https://addons.mozilla.org/firefox/addon/tabtome/"')) {
+    throw new Error(`${locale} home is missing the public Mozilla Add-ons link.`);
+  }
+  if (!home.includes('href="/assets/tabtome-icon.svg"') || !home.includes('src="/assets/tabtome-icon.svg"')) {
+    throw new Error(`${locale} home is missing the TabTome favicon or header icon.`);
   }
   for (const imageName of ["01-tabs-1280x800.png", "02-text-1280x800.png", "03-settings-1280x800.png"]) {
     if (!home.includes(imageName)) throw new Error(`${locale} home is missing screenshot ${imageName}.`);

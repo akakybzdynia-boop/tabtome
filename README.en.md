@@ -1,6 +1,8 @@
 # TabTome
 
-[Русская версия](README.md) · [Website](https://tabtome.netlify.app/en/) · [Privacy policy](https://tabtome.netlify.app/en/privacy/)
+<p align="center"><img src="extension/icons/icon-128.png" width="96" height="96" alt="TabTome icon: an open orange book on a dark navy background"></p>
+
+[Install from Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/tabtome/) · [Русская версия](README.md) · [Website](https://tabtome.netlify.app/en/) · [Privacy policy](https://tabtome.netlify.app/en/privacy/)
 
 TabTome turns one or more pages already open in Firefox, or formatted text pasted by the user, into an EPUB and sends it to Kindle or PocketBook through the user's own SMTP account.
 
@@ -11,7 +13,7 @@ The system has two parts:
 
 The developer operates no content-processing backend. Page content, books, email addresses, passwords, job history, and diagnostics are not sent to the developer. The SMTP provider and the selected Amazon or PocketBook delivery service receive the email and attachment under their own terms.
 
-Prepared versions: Firefox extension **0.11.1**, Windows app **0.11.1**, Native Messaging protocol **2**. Firefox is the supported browser. A Chrome/Chromium build is generated from the same source but remains experimental because the Windows installer does not yet register its Native Messaging origin.
+Current public Firefox extension: **0.11.2**. Current Windows app: **0.11.1**. Both use Native Messaging protocol **2**. Firefox is the supported browser. A Chrome/Chromium build is generated from the same source but remains experimental because the Windows installer does not yet register its Native Messaging origin.
 
 ## Requirements
 
@@ -45,7 +47,7 @@ Signed installer download links will be added after SignPath approval and public
 1. Install `TabTome-Setup-0.11.1.exe` as the current Windows user. Administrator rights are not required. A fresh installation uses `%LOCALAPPDATA%\Programs\TabTome` and registers the app for Firefox through the current-user Native Messaging registry key. The legacy data directory and technical IDs are retained during upgrades for compatibility.
 2. Open **TabTome** from the Start menu. Enter the sender address, Kindle and/or PocketBook address, default destination, SMTP settings, and the SMTP app password. For Gmail, use a Google app password rather than the normal account password.
 3. Add the sender to the appropriate Amazon or PocketBook allowlist, confirm only the services you configured, then select **Save and test SMTP**.
-4. Install the signed Firefox extension and restart Firefox completely.
+4. [Install the signed TabTome 0.11.2 extension from Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/tabtome/) and restart Firefox completely.
 5. Open the extension settings and run the 20 MB channel test. This checks the real Firefox-to-app channel without building an EPUB or sending email.
 6. Open the popup, select one or more tabs or paste content in **Text**, choose the destination, and send.
 

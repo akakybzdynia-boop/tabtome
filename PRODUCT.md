@@ -32,7 +32,7 @@ The normal flow is: install the browser extension, install the TabTome Windows a
 - Firefox is the supported public distribution target; Chrome/Chromium is a manual experimental installation for now.
 - The landing page, public GitHub documentation, and extension interface must support Russian and English.
 - The landing page uses separate `/ru/` and `/en/` URLs plus a visible language switcher.
-- Initial download and store links are placeholders until public AMO, GitHub Release, support, and source URLs exist.
+- The Firefox extension is publicly available from Mozilla Add-ons. The Windows app is currently distributed as an explicitly unsigned GitHub pre-release until Authenticode signing is available.
 - No accounts, forms, analytics, cookies, advertising, or remote application backend.
 - Netlify is the intended landing-page host; downloadable release binaries should ultimately live in public GitHub Releases.
 - The public name is TabTome. Browser names may describe compatibility but are not part of the product name.
