@@ -2,7 +2,7 @@
 
 <p align="center"><img src="extension/icons/icon-128.png" width="96" height="96" alt="TabTome icon: an open orange book on a dark navy background"></p>
 
-[Install from Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/tabtome/) · [Русская версия](README.md) · [Website](https://tabtome.netlify.app/en/) · [Privacy policy](https://tabtome.netlify.app/en/privacy/)
+[Install from Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/tabtome/) · [Русская версия](README.md) · [Website](https://tab-tome.netlify.app/en/) · [Privacy policy](https://tab-tome.netlify.app/en/privacy/)
 
 TabTome turns one or more pages already open in Firefox, or formatted text pasted by the user, into an EPUB and sends it to Kindle or PocketBook through the user's own SMTP account.
 

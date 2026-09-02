@@ -9,9 +9,9 @@ Prepared: August 28, 2026.
 - **Category:** Other
 - **Platform:** Firefox for Windows only
 - **License:** Mozilla Public License 2.0
-- **Homepage:** `https://tabtome.netlify.app/en/`
+- **Homepage:** `https://tab-tome.netlify.app/en/`
 - **Support website:** `https://github.com/akakybzdynia-boop/tabtome/issues`
-- **Privacy policy:** `https://tabtome.netlify.app/en/privacy/`
+- **Privacy policy:** `https://tab-tome.netlify.app/en/privacy/`
 - **Windows app download:** `https://github.com/akakybzdynia-boop/tabtome/releases/tag/v0.11.1-unsigned-preview`
 - **Source repository:** `https://github.com/akakybzdynia-boop/tabtome`
 
@@ -156,7 +156,7 @@ The extension does not collect data for the developer. Native Messaging transfer
 4. Upload `outputs/2-TABTOME-SOURCE-CODE-v0.11.1.zip` as source code.
 5. Paste `docs/releases/AMO_REVIEW_NOTES_v0.11.1.md` into Notes for Reviewers.
 6. Select Windows only; do not select Android, Linux, or macOS.
-7. Select MPL-2.0 and add `https://tabtome.netlify.app/en/privacy/`.
+7. Select MPL-2.0 and add `https://tab-tome.netlify.app/en/privacy/`.
 8. Add the homepage and support URLs from Basic information.
 9. Upload the three screenshots in the order above.
 10. Do not submit the Chrome ZIP, project ZIP, Windows installer, or SMTP credentials to AMO.

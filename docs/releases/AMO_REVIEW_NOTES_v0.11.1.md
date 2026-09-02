@@ -2,7 +2,7 @@
 
 Version 0.11.1 is a small toolbar-status reliability update. It does not add permissions, data collection, network destinations, analytics, advertising, or remotely hosted code. Native Messaging protocol remains version 2.
 
-This submission is intended for the public **On this site / Listed** channel. The public project repository is https://github.com/akakybzdynia-boop/tabtome and the privacy policy is https://tabtome.netlify.app/en/privacy/.
+This submission is intended for the public **On this site / Listed** channel. The public project repository is https://github.com/akakybzdynia-boop/tabtome and the privacy policy is https://tab-tome.netlify.app/en/privacy/.
 
 ## User-visible change
 

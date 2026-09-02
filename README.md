@@ -2,7 +2,7 @@
 
 <p align="center"><img src="extension/icons/icon-128.png" width="96" height="96" alt="Иконка TabTome: открытая оранжевая книга на тёмно-синем фоне"></p>
 
-[Установить из Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/tabtome/) · [English](README.en.md) · [Сайт](https://tabtome.netlify.app/ru/) · [Политика конфиденциальности](https://tabtome.netlify.app/ru/privacy/)
+[Установить из Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/tabtome/) · [English](README.en.md) · [Сайт](https://tab-tome.netlify.app/ru/) · [Политика конфиденциальности](https://tab-tome.netlify.app/ru/privacy/)
 
 Локальная система для Windows: расширение браузера извлекает статьи из уже открытых вкладок через Mozilla Readability либо принимает вставленный пользователем форматированный текст и изображения. Приложение TabTome запускается по требованию, собирает EPUB и отправляет его на Kindle или PocketBook через SMTP. Рабочая установка сейчас рассчитана на Firefox; из той же кодовой базы также собирается Chrome-пакет, для которого ещё не добавлена регистрация приложения.
 

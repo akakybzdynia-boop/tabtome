@@ -23,7 +23,7 @@
 /en/privacy/
   Privacy policy in both languages.
 
-Status: published on 28 August 2026 at `https://tabtome.netlify.app/`. AMO can use the permanent English privacy-policy URL.
+Status: published on 2 September 2026 at `https://tab-tome.netlify.app/`. AMO can use the permanent English privacy-policy URL.
 
 /ru/help/
 /en/help/
@@ -35,7 +35,7 @@ Status: published on 28 August 2026 at `https://tabtome.netlify.app/`. AMO can u
 
 The landing pages, localized help pages, language handoff, 404 page, privacy pages, shared styles, and three 1280×800 interface screenshots are published on Netlify. A public unsigned GitHub pre-release is available for SignPath review; AMO publication and a signed Windows release remain pending.
 
-Every localized page includes reciprocal absolute `hreflang` links, a visible language switcher that keeps the visitor on the equivalent route, and a canonical `https://tabtome.netlify.app/` URL.
+Every localized page includes reciprocal absolute `hreflang` links, a visible language switcher that keeps the visitor on the equivalent route, and a canonical `https://tab-tome.netlify.app/` URL.
 
 ## Primary landing-page sequence
 
@@ -103,7 +103,7 @@ GITHUB_PROJECT_URL = https://github.com/akakybzdynia-boop/tabtome
 GITHUB_INSTALLER_URL = https://github.com/akakybzdynia-boop/tabtome/releases
 GITHUB_CHROME_ZIP_URL
 SUPPORT_URL = https://github.com/akakybzdynia-boop/tabtome/issues
-NETLIFY_SITE_URL = https://tabtome.netlify.app/
+NETLIFY_SITE_URL = https://tab-tome.netlify.app/
 ```
 
 Placeholders must render as unavailable controls or documented preview links; they must never point to `#` while appearing functional.

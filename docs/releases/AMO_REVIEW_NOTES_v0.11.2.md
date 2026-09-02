@@ -18,7 +18,7 @@ The generated Firefox package is in `dist/`. The submitted source archive contai
 ## Project and privacy information
 
 - Public source repository: https://github.com/akakybzdynia-boop/tabtome
-- Privacy policy: https://tabtome.netlify.app/en/privacy/
+- Privacy policy: https://tab-tome.netlify.app/en/privacy/
 - Windows application preview: https://github.com/akakybzdynia-boop/tabtome/releases/tag/v0.11.1-unsigned-preview
 
 The Windows application is separate from the extension ZIP and is not required to reproduce the submitted browser code. It builds EPUB files locally and sends them through the SMTP account configured by the user. The developer operates no content-processing backend.
