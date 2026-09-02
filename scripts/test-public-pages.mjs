@@ -16,10 +16,19 @@ const publicPages = {
   ruHelp: readFileSync(join(root, "landing", "ru", "help", "index.html"), "utf8"),
   enHelp: readFileSync(join(root, "landing", "en", "help", "index.html"), "utf8")
 };
+const siteCss = readFileSync(join(root, "landing", "assets", "site.css"), "utf8");
 
 if (!existsSync(join(root, "landing", "assets", "privacy.css"))) throw new Error("Privacy page stylesheet is missing.");
 if (!existsSync(join(root, "landing", "assets", "site.css"))) throw new Error("Public site stylesheet is missing.");
 if (!existsSync(join(root, "landing", "assets", "tabtome-icon.svg"))) throw new Error("Public TabTome icon is missing.");
+for (const assetName of ["postal-airmail.svg", "postal-postmark.svg", "postal-vologda.svg", "postal-grandfather.svg", "postal-blank-blue.svg", "postal-blank-yellow.svg"]) {
+  if (!existsSync(join(root, "landing", "assets", assetName))) throw new Error(`Postal background asset is missing: ${assetName}`);
+  if (!siteCss.includes(`url("${assetName}")`)) throw new Error(`Postal background asset is not referenced: ${assetName}`);
+}
+for (const assetName of ["postal-blank-blue.svg", "postal-blank-yellow.svg"]) {
+  const svg = readFileSync(join(root, "landing", "assets", assetName), "utf8");
+  if (/[Ѐ-ӿ]/i.test(svg)) throw new Error(`English postal asset contains Cyrillic text: ${assetName}`);
+}
 
 for (const [locale, html] of Object.entries(pages)) {
   for (const required of [
@@ -77,7 +86,7 @@ for (const [locale, home, help, otherLocale] of [
   }
 }
 
-if (!publicPages.ruHome.includes("Статьи не загружаются на сервер разработчика") || !publicPages.enHome.includes("not uploaded to the developer's server")) {
+if (!publicPages.ruHome.includes("создаст EPUB на вашем компьютере") || !publicPages.enHome.includes("builds an EPUB on your PC")) {
   throw new Error("The local-processing advantage is not stated early in both languages.");
 }
 

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 280" role="img" aria-label="">
+  <g fill="none" stroke="#ffb000" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="25" y="28" width="410" height="224" rx="7" stroke-width="5"/>
+    <path d="M28 34l202 126L432 34M28 247l141-100M432 247L291 147" stroke-width="3"/>
+    <circle cx="362" cy="89" r="43" stroke-width="4"/>
+    <path d="M327 81h70M327 97h70" stroke-width="3"/>
+  </g>
+  <text x="215" y="104" fill="#ffb000" stroke="#fff" stroke-width="7" paint-order="stroke fill" font-family="Georgia, serif" font-size="24" font-style="italic" letter-spacing="1.5" text-anchor="middle">В Вологду-гду</text>
+  <g fill="none" stroke="#ffb000" stroke-width="3">
+    <rect x="116" y="184" width="30" height="32"/><rect x="151" y="184" width="30" height="32"/><rect x="186" y="184" width="30" height="32"/><rect x="221" y="184" width="30" height="32"/><rect x="256" y="184" width="30" height="32"/><rect x="291" y="184" width="30" height="32"/>
+  </g>
+</svg>
