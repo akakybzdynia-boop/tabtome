@@ -17,7 +17,11 @@ The SMTP password is encrypted for the current Windows user with Windows DPAPI.
 Firefox Native Messaging registration:
   HKEY_CURRENT_USER\Software\Mozilla\NativeMessagingHosts\page_to_ereader_local
 
-Uninstalling the application removes its program files and Firefox registration. The uninstaller asks separately whether user settings and logs should also be removed.
+Chrome/Chromium Native Messaging registration:
+  HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\page_to_ereader_local
+  HKEY_CURRENT_USER\Software\Chromium\NativeMessagingHosts\page_to_ereader_local
+
+Uninstalling the application removes its program files and browser Native Messaging registrations. The uninstaller asks separately whether user settings and logs should also be removed.
 
 Project source code license:
   Mozilla Public License 2.0. See LICENSE in the application directory.

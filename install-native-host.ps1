@@ -9,6 +9,10 @@ $hostManifest = Join-Path $hostDirectory "manifest.json"
 $entryPoint = Join-Path $projectRoot "server\dist\native-host.js"
 $environmentFile = Join-Path $projectRoot "server\.env"
 $registryPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\$hostName"
+$chromeRegistryPaths = @(
+    "HKCU:\Software\Google\Chrome\NativeMessagingHosts\$hostName",
+    "HKCU:\Software\Chromium\NativeMessagingHosts\$hostName"
+)
 $obsoleteSourceFiles = @(
     "server\src\app.ts",
     "server\src\app.test.ts",
@@ -69,10 +73,25 @@ $manifest = [ordered]@{
 $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($hostManifest, ($manifest | ConvertTo-Json -Depth 3), $utf8WithoutBom)
 
+$chromeManifest = [ordered]@{
+    name = $hostName
+    description = "TabTome native host"
+    path = $hostLauncher
+    type = "stdio"
+    allowed_origins = @("chrome-extension://fmmlphejpodoaipafggdhgklelkkdleh/")
+}
+$chromeManifestPath = Join-Path $hostDirectory "chrome-manifest.json"
+[System.IO.File]::WriteAllText($chromeManifestPath, ($chromeManifest | ConvertTo-Json -Depth 3), $utf8WithoutBom)
+
 New-Item -Path $registryPath -Force | Out-Null
 Set-Item -Path $registryPath -Value $hostManifest
+foreach ($chromeRegistryPath in $chromeRegistryPaths) {
+    New-Item -Path $chromeRegistryPath -Force | Out-Null
+    Set-Item -Path $chromeRegistryPath -Value $chromeManifestPath
+}
 
 Write-Host "Native host installed for the current Windows user."
 Write-Host "Registry key: HKEY_CURRENT_USER\Software\Mozilla\NativeMessagingHosts\$hostName"
+Write-Host "Chrome registry keys: HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\$hostName and HKEY_CURRENT_USER\Software\Chromium\NativeMessagingHosts\$hostName"
 Write-Host "Manifest: $hostManifest"
 Write-Host "Restart Firefox, then open the extension settings and run diagnostics."

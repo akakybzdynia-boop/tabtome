@@ -43,6 +43,8 @@ Source: "stage\app\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs cre
 
 [Registry]
 Root: HKCU; Subkey: "Software\Mozilla\NativeMessagingHosts\page_to_ereader_local"; ValueType: string; ValueName: ""; ValueData: "{app}\host\manifest.json"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Google\Chrome\NativeMessagingHosts\page_to_ereader_local"; ValueType: string; ValueName: ""; ValueData: "{app}\host\chrome-manifest.json"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Chromium\NativeMessagingHosts\page_to_ereader_local"; ValueType: string; ValueName: ""; ValueData: "{app}\host\chrome-manifest.json"; Flags: uninsdeletekey
 
 [Icons]
 Name: "{group}\Настройки TabTome"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\TabTome.ico"
@@ -53,6 +55,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "Настроить почту �
 
 [UninstallDelete]
 Type: files; Name: "{app}\host\manifest.json"
+Type: files; Name: "{app}\host\chrome-manifest.json"
 Type: files; Name: "{app}\host\node-path.txt"
 Type: files; Name: "{app}\host\data-root.txt"
 Type: dirifempty; Name: "{app}\host"
@@ -132,6 +135,15 @@ begin
 
   if not SaveStringToFile(AddBackslash(HostDirectory) + 'manifest.json', Manifest, False) then
     RaiseException('Could not write the Firefox Native Messaging manifest.');
+  Manifest := '{' + #13#10 +
+    '  "name": "page_to_ereader_local",' + #13#10 +
+    '  "description": "TabTome native host",' + #13#10 +
+    '  "path": "' + JsonPath(AddBackslash(HostDirectory) + 'TabTomeHost.exe') + '",' + #13#10 +
+    '  "type": "stdio",' + #13#10 +
+    '  "allowed_origins": ["chrome-extension://fmmlphejpodoaipafggdhgklelkkdleh/"]' + #13#10 +
+    '}' + #13#10;
+  if not SaveStringToFile(AddBackslash(HostDirectory) + 'chrome-manifest.json', Manifest, False) then
+    RaiseException('Could not write the Chrome Native Messaging manifest.');
   if not SaveStringToFile(AddBackslash(HostDirectory) + 'node-path.txt', AddBackslash(AppDirectory) + 'runtime\node.exe', False) then
     RaiseException('Could not write the bundled Node.js path.');
   if not SaveStringToFile(AddBackslash(HostDirectory) + 'data-root.txt', DataDirectory, False) then

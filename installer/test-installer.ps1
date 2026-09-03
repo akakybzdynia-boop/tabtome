@@ -5,7 +5,7 @@ param(
 $ErrorActionPreference = "Stop"
 $installerDirectory = $PSScriptRoot
 $root = Split-Path -Parent $installerDirectory
-if (-not $InstallerPath) { $InstallerPath = Join-Path $root "outputs\TabTome-Setup-0.11.1.exe" }
+if (-not $InstallerPath) { $InstallerPath = Join-Path $root "outputs\TabTome-Setup-0.11.2.exe" }
 $InstallerPath = (Resolve-Path -LiteralPath $InstallerPath).Path
 $testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("TabTomeInstallerTest-" + [guid]::NewGuid().ToString("N"))
 $installDirectory = Join-Path $testRoot "app"
@@ -13,8 +13,16 @@ $dataDirectory = Join-Path $testRoot "data"
 $legacyRoot = Join-Path $testRoot "legacy"
 $setupLog = Join-Path $testRoot "setup.log"
 $registryPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\page_to_ereader_local"
+$chromeRegistryPaths = @(
+    "HKCU:\Software\Google\Chrome\NativeMessagingHosts\page_to_ereader_local",
+    "HKCU:\Software\Chromium\NativeMessagingHosts\page_to_ereader_local"
+)
 $hadRegistration = Test-Path -LiteralPath $registryPath
 $previousRegistration = if ($hadRegistration) { (Get-Item -LiteralPath $registryPath).GetValue("") } else { $null }
+$previousChromeRegistrations = @{}
+foreach ($chromeRegistryPath in $chromeRegistryPaths) {
+    $previousChromeRegistrations[$chromeRegistryPath] = if (Test-Path -LiteralPath $chromeRegistryPath) { (Get-Item -LiteralPath $chromeRegistryPath).GetValue("") } else { $null }
+}
 
 function Assert-TestPath {
     param([string] $Path)
@@ -67,8 +75,9 @@ try {
     $settingsExecutable = Join-Path $installDirectory "TabTomeSettings.exe"
     $runtimeExecutable = Join-Path $installDirectory "runtime\node.exe"
     $manifestFile = Join-Path $installDirectory "host\manifest.json"
+    $chromeManifestFile = Join-Path $installDirectory "host\chrome-manifest.json"
     $licenseFile = Join-Path $installDirectory "LICENSE"
-    foreach ($file in @($hostExecutable, $settingsExecutable, $runtimeExecutable, $manifestFile, $licenseFile)) {
+    foreach ($file in @($hostExecutable, $settingsExecutable, $runtimeExecutable, $manifestFile, $chromeManifestFile, $licenseFile)) {
         if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Installed file is missing: $file" }
     }
     if ((Get-Content -LiteralPath $licenseFile -TotalCount 1) -ne "Mozilla Public License Version 2.0") {
@@ -88,6 +97,16 @@ try {
     }
     if ((Get-Item -LiteralPath $registryPath).GetValue("") -ne $manifestFile) {
         throw "Firefox Native Messaging registry value is invalid."
+    }
+    $chromeManifest = Get-Content -Raw -LiteralPath $chromeManifestFile | ConvertFrom-Json
+    if ($chromeManifest.name -ne "page_to_ereader_local" -or $chromeManifest.path -ne $hostExecutable -or
+        $chromeManifest.allowed_origins[0] -ne "chrome-extension://fmmlphejpodoaipafggdhgklelkkdleh/") {
+        throw "Installed Chrome Native Messaging manifest is invalid."
+    }
+    foreach ($chromeRegistryPath in $chromeRegistryPaths) {
+        if ((Get-Item -LiteralPath $chromeRegistryPath).GetValue("") -ne $chromeManifestFile) {
+            throw "Chrome Native Messaging registry value is invalid: $chromeRegistryPath"
+        }
     }
     if ((Get-Content -Raw -LiteralPath (Join-Path $dataDirectory ".env")) -ne "$legacyEnvironment`r`n" -or
         (Get-Content -Raw -LiteralPath (Join-Path $dataDirectory ".smtp-pass")) -ne "lazy-dpapi-placeholder" -or
@@ -116,6 +135,15 @@ try {
         Set-Item -LiteralPath $registryPath -Value $previousRegistration
     } elseif (Test-Path -LiteralPath $registryPath) {
         Remove-Item -LiteralPath $registryPath -Force
+    }
+    foreach ($chromeRegistryPath in $chromeRegistryPaths) {
+        $previousValue = $previousChromeRegistrations[$chromeRegistryPath]
+        if ($null -ne $previousValue) {
+            New-Item -Path $chromeRegistryPath -Force | Out-Null
+            Set-Item -LiteralPath $chromeRegistryPath -Value $previousValue
+        } elseif (Test-Path -LiteralPath $chromeRegistryPath) {
+            Remove-Item -LiteralPath $chromeRegistryPath -Force
+        }
     }
     if (Test-Path -LiteralPath $testRoot) {
         Assert-TestPath $testRoot
