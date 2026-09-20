@@ -3,14 +3,15 @@ import { createWriteStream } from 'node:fs';
 import { access, mkdir, rename, rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 
 const version = process.env.TABTOME_INSTALLER_VERSION ?? 'v0.12.0-unsigned-preview';
 const assetName = process.env.TABTOME_INSTALLER_ASSET ?? 'TabTome-Setup-0.12.0.exe';
 const expectedSha256 = (process.env.TABTOME_INSTALLER_SHA256 ??
   'd621ce9726a735c3daaf9d0874666733930b58d478034ba89382eaba723f8cb8').toLowerCase();
 const repository = 'akakybzdynia-boop/tabtome';
-const target = resolve('landing', 'downloads', 'TabTome-Setup.exe');
+const siteRoot = basename(process.cwd()).toLowerCase() === 'landing' ? resolve('.') : resolve('landing');
+const target = resolve(siteRoot, 'downloads', 'TabTome-Setup.exe');
 const temporary = `${target}.part`;
 const url = `https://github.com/${repository}/releases/download/${encodeURIComponent(version)}/${encodeURIComponent(assetName)}`;
 
