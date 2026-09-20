@@ -50,7 +50,7 @@ img { display: block; max-width: 100%; }
 .language-switch a, .language-switch span { padding: 4px 7px; border-radius: 3px; }
 .language-switch [aria-current="page"] { background: var(--paper-deep); color: var(--ink); font-weight: 700; }
 
-.hero { padding: 80px 0 56px; border-bottom: 1px solid var(--line); background: #fff; }
+.hero { padding: 80px 0 56px; border-bottom: 1px solid var(--line); background: transparent; }
 .hero-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); align-items: center; }
 h1 { max-width: 760px; margin: 0 0 var(--space-3); color: var(--ink); font-family: var(--display); font-size: clamp(2.35rem, 5vw, 4.6rem); font-weight: 650; line-height: 1.09; letter-spacing: -.025em; text-wrap: balance; }
 .lead { max-width: 680px; margin: 0 0 var(--space-4); color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.3rem); }
@@ -58,13 +58,32 @@ h1 { max-width: 760px; margin: 0 0 var(--space-3); color: var(--ink); font-famil
 .actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .hero .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: calc(100% + var(--space-4)); }
 .final .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
-.hero .actions .button { min-height: 48px; padding-inline: 12px; font-size: .875rem; white-space: nowrap; }
-.final .actions .button { min-height: 48px; padding-inline: 12px; font-size: .875rem; white-space: nowrap; }
+.hero .actions .button,
+.final .actions .button {
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  font-size: .875rem;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+}
+.hero .actions,
+.final .actions { grid-auto-rows: minmax(64px, auto); align-items: stretch; }
 .button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border: 1px solid var(--ink); border-radius: 3px; background: var(--ink); color: #fff; font-weight: 750; text-decoration: none; transition: background-color 140ms ease-out, color 140ms ease-out; }
 .button:hover { background: #164b60; }
 .button.secondary { border-color: var(--orange); background: var(--orange); color: var(--ink); }
 .button.secondary:hover { border-color: #ffc640; background: #ffc640; }
 .button.pending { border-color: var(--line); background: var(--paper-deep); color: var(--muted); cursor: not-allowed; }
+.button-icon { width: 19px; height: 19px; margin-right: 8px; flex: 0 0 auto; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+.button-logo { stroke: none; }
+.hero .browser-firefox .button-logo { filter: brightness(0) invert(1); }
+.button.browser-chrome { border-color: var(--orange); background: var(--orange); color: var(--ink); }
+.button.browser-chrome:hover { border-color: #ffc640; background: #ffc640; }
+.button.windows-app { border-color: var(--line-strong); background: var(--paper-deep); color: var(--ink); }
+.button.windows-app:hover { border-color: var(--ink); background: #d9ebf0; }
+.button.github-releases { border-color: var(--line-strong); background: #fff; color: var(--ink); }
+.button.github-releases:hover { border-color: var(--ink); background: var(--paper-deep); }
 
 .flow-card { padding: var(--space-4); border: 1px solid var(--line-strong); border-radius: 2px; background: var(--yellow-pale); }
 .flow { display: grid; gap: 14px; }
@@ -73,19 +92,29 @@ h1 { max-width: 760px; margin: 0 0 var(--space-3); color: var(--ink); font-famil
 .flow-step strong { display: block; }
 .flow-step span { color: var(--muted); font-size: .9rem; }
 
+main { position: relative; isolation: isolate; }
 section { padding: var(--space-6) 0; }
-.surface-paper { background: #fff; }
+.surface-paper { background: transparent; }
 
 .hero, section { position: relative; isolation: isolate; overflow: hidden; }
 .hero .container, section .container { position: relative; z-index: 1; }
+.postal-route { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.postal-route svg { display: block; width: 100%; height: 100%; }
+.postal-route path { fill: none; stroke-linecap: round; stroke-width: 3.25; stroke-dasharray: 2 19; vector-effect: non-scaling-stroke; }
+.postal-route .route-navy { stroke: #003049; opacity: .42; }
+.postal-route .route-orange { stroke: #ffb000; opacity: .72; }
 html[lang="ru"] .hero::after,
 html[lang="ru"] #benefits::after,
 html[lang="ru"] #how::before,
 html[lang="ru"] #privacy::after,
+html[lang="ru"] #install::before,
+html[lang="ru"] #install::after,
 html[lang="en"] .hero::after,
 html[lang="en"] #benefits::after,
 html[lang="en"] #how::before,
-html[lang="en"] #privacy::after {
+html[lang="en"] #privacy::after,
+html[lang="en"] #install::before,
+html[lang="en"] #install::after {
   position: absolute;
   z-index: 0;
   display: block;
@@ -101,16 +130,16 @@ html[lang="ru"] .hero::after {
   width: 315px;
   height: 182px;
   background-image: url("postal-grandfather.svg");
-  opacity: .16;
+  opacity: .21;
   transform: rotate(-9deg);
 }
 html[lang="ru"] #benefits::after {
   right: 5%;
   bottom: 18px;
-  width: 195px;
-  height: 135px;
-  background-image: url("postal-postmark.svg");
-  opacity: .125;
+  width: 214px;
+  height: 122px;
+  background-image: url("postal-katerina.svg");
+  opacity: .19;
   transform: rotate(8deg);
 }
 html[lang="ru"] #how::before {
@@ -119,7 +148,7 @@ html[lang="ru"] #how::before {
   width: 230px;
   height: 140px;
   background-image: url("postal-vologda.svg");
-  opacity: .11;
+  opacity: .19;
   transform: rotate(-4deg);
 }
 html[lang="ru"] #privacy::after {
@@ -128,7 +157,7 @@ html[lang="ru"] #privacy::after {
   width: 230px;
   height: 140px;
   background-image: url("postal-airmail.svg");
-  opacity: .10;
+  opacity: .18;
   transform: rotate(5deg);
 }
 html[lang="en"] .hero::after {
@@ -137,7 +166,7 @@ html[lang="en"] .hero::after {
   width: 315px;
   height: 182px;
   background-image: url("postal-blank-blue.svg");
-  opacity: .16;
+  opacity: .22;
   transform: rotate(-9deg);
 }
 html[lang="en"] #benefits::after {
@@ -146,7 +175,7 @@ html[lang="en"] #benefits::after {
   width: 195px;
   height: 135px;
   background-image: url("postal-blank-yellow.svg");
-  opacity: .125;
+  opacity: .19;
   transform: rotate(8deg);
 }
 html[lang="en"] #how::before {
@@ -155,7 +184,7 @@ html[lang="en"] #how::before {
   width: 230px;
   height: 140px;
   background-image: url("postal-airmail.svg");
-  opacity: .11;
+  opacity: .19;
   transform: rotate(-4deg);
 }
 html[lang="en"] #privacy::after {
@@ -164,7 +193,43 @@ html[lang="en"] #privacy::after {
   width: 230px;
   height: 140px;
   background-image: url("postal-blank-blue.svg");
-  opacity: .10;
+  opacity: .18;
+  transform: rotate(5deg);
+}
+html[lang="ru"] #install::before {
+  left: calc(50% - 828px);
+  top: 42px;
+  width: 244px;
+  height: 142px;
+  background-image: url("postal-martin.svg");
+  opacity: .20;
+  transform: rotate(-5deg);
+}
+html[lang="ru"] #install::after {
+  right: calc(50% - 828px);
+  bottom: 28px;
+  width: 250px;
+  height: 144px;
+  background-image: url("postal-parents.svg");
+  opacity: .20;
+  transform: rotate(5deg);
+}
+html[lang="en"] #install::before {
+  left: calc(50% - 828px);
+  top: 42px;
+  width: 244px;
+  height: 142px;
+  background-image: url("postal-blank-blue.svg");
+  opacity: .22;
+  transform: rotate(-5deg);
+}
+html[lang="en"] #install::after {
+  right: calc(50% - 828px);
+  bottom: 28px;
+  width: 250px;
+  height: 144px;
+  background-image: url("postal-blank-yellow.svg");
+  opacity: .22;
   transform: rotate(5deg);
 }
 h2 { max-width: 850px; margin: 0 0 var(--space-2); color: var(--ink); font-family: var(--display); font-size: clamp(1.8rem, 3vw, 2.65rem); font-weight: 650; line-height: 1.12; letter-spacing: -.015em; text-wrap: balance; }
@@ -203,6 +268,14 @@ h3 { margin: 0 0 var(--space-1); color: var(--ink); font-family: var(--display);
 .final .button:hover { border-color: #ffc640; background: #ffc640; }
 .final .button.secondary { border-color: #fff; background: #fff; color: var(--ink); }
 .final .button.secondary:hover { background: var(--paper-deep); }
+.final .button.browser-firefox { border-color: #ffc640; background: #ffc640; color: var(--ink); }
+.final .button.browser-firefox:hover { border-color: #ffdb7a; background: #ffdb7a; }
+.final .button.browser-chrome { border-color: var(--orange); background: var(--orange); color: var(--ink); }
+.final .button.browser-chrome:hover { border-color: #ffc640; background: #ffc640; }
+.final .button.windows-app { border-color: #fff; background: #fff; color: var(--ink); }
+.final .button.windows-app:hover { border-color: var(--paper-deep); background: var(--paper-deep); }
+.final .button.github-releases { border-color: var(--paper-deep); background: var(--paper-deep); color: var(--ink); }
+.final .button.github-releases:hover { border-color: #fff; background: #fff; }
 
 .prose { width: min(820px, calc(100% - 40px)); margin: 0 auto; padding: 64px 0 90px; }
 .prose h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
@@ -217,6 +290,10 @@ h3 { margin: 0 0 var(--space-1); color: var(--ink); font-family: var(--display);
   .hero .actions { grid-template-columns: 1fr; width: 100%; }
 }
 
+@media (max-width: 1220px) {
+  .postal-route { display: none; }
+}
+
 @media (max-width: 820px) {
   .site-nav { display: none; }
   .language-switch { margin-left: auto; }
@@ -226,13 +303,17 @@ h3 { margin: 0 0 var(--space-1); color: var(--ink); font-family: var(--display);
   .value-grid[data-layout="three"] { grid-template-columns: 1fr 1fr; }
   .screenshot.wide { grid-column: auto; }
   .feature-list { columns: 1; }
-  html[lang="ru"] .hero::after { top: 10px; right: -42px; width: 220px; height: 128px; opacity: .12; }
-  html[lang="ru"] #benefits::after { right: -30px; width: 155px; height: 108px; opacity: .09; }
-  html[lang="ru"] #how::before { left: -35px; width: 175px; height: 108px; opacity: .085; }
+  html[lang="ru"] .hero::after { top: 10px; right: -42px; width: 220px; height: 128px; opacity: .16; }
+  html[lang="ru"] #benefits::after { right: -30px; width: 155px; height: 108px; opacity: .13; }
+  html[lang="ru"] #how::before { left: -35px; width: 175px; height: 108px; opacity: .12; }
   html[lang="ru"] #privacy::after { display: none; }
-  html[lang="en"] .hero::after { top: 10px; right: -42px; width: 220px; height: 128px; opacity: .12; }
-  html[lang="en"] #benefits::after { right: -30px; width: 155px; height: 108px; opacity: .09; }
-  html[lang="en"] #how::before { left: -35px; width: 175px; height: 108px; opacity: .085; }
+  html[lang="ru"] #install::before,
+  html[lang="ru"] #install::after,
+  html[lang="en"] #install::before,
+  html[lang="en"] #install::after { display: none; }
+  html[lang="en"] .hero::after { top: 10px; right: -42px; width: 220px; height: 128px; opacity: .16; }
+  html[lang="en"] #benefits::after { right: -30px; width: 155px; height: 108px; opacity: .13; }
+  html[lang="en"] #how::before { left: -35px; width: 175px; height: 108px; opacity: .12; }
   html[lang="en"] #privacy::after { display: none; }
 }
 
