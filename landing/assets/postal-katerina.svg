@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 320" role="img" aria-label="">
+  <g fill="none" stroke="#003049" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="24" y="38" width="512" height="244" rx="8" stroke-width="5"/>
+    <path d="M29 45 280 198 531 45M29 275l169-111M531 275 362 164" stroke-width="3"/>
+    <path d="M70 219h110M70 235h152M70 251h86" stroke-width="3" opacity=".72"/>
+    <path d="M362 84h100M362 100h68" stroke-width="3" opacity=".72"/>
+  </g>
+  <g fill="#003049" font-family="Georgia, serif" font-size="25" font-style="italic" text-anchor="middle">
+    <text x="280" y="109">ЛЮБЕЗНАЯ МОЯ</text>
+    <text x="280" y="144">КАТЕРИНА МАТВЕЕВНА…</text>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" role="img" aria-label="">
+  <g fill="none" stroke="#ffb000" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="22" y="34" width="476" height="232" rx="8" stroke-width="5"/>
+    <path d="M27 41 260 184 493 41M27 259l157-104M493 259 336 155" stroke-width="3"/>
+    <path d="M63 201h112M63 218h138M63 235h82M320 76h100M320 93h69" stroke-width="3" opacity=".74"/>
+  </g>
+  <g fill="#ffb000" font-family="Georgia, serif" font-size="26" font-style="italic" text-anchor="middle">
+    <text x="260" y="105">ДОРОГИЕ МАМА</text>
+    <text x="260" y="140">И ПАПА!..</text>
+  </g>
+</svg>
