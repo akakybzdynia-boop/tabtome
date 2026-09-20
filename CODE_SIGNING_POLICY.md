@@ -24,7 +24,7 @@ If additional maintainers are added, signing approval should be separated from t
 
 1. Release source is committed to the public GitHub repository.
 2. The normal Windows CI workflow builds and tests the source on a GitHub-hosted Windows runner.
-3. The maintainer creates a tag named `windows-v<application-version>`, for example `windows-v0.11.1`.
+3. The maintainer creates a tag named `windows-v<application-version>`, for example `windows-v0.12.0`.
 4. The manual `Windows SignPath release candidate` workflow is started from that exact tag.
 5. The workflow rebuilds from a clean checkout, runs the complete project test suite, and prepares the installer stage using pinned Node.js and Inno Setup versions.
 6. SignPath signs the native host and settings application from the GitHub Actions artifact.
@@ -52,8 +52,8 @@ Signing failures must not be bypassed by publishing an unsigned file under the s
 Users can inspect a downloaded installer in PowerShell:
 
 ```powershell
-Get-AuthenticodeSignature .\TabTome-Setup-0.11.1.exe | Format-List Status,StatusMessage,SignerCertificate
-Get-FileHash -Algorithm SHA256 .\TabTome-Setup-0.11.1.exe
+Get-AuthenticodeSignature .\TabTome-Setup-0.12.0.exe | Format-List Status,StatusMessage,SignerCertificate
+Get-FileHash -Algorithm SHA256 .\TabTome-Setup-0.12.0.exe
 ```
 
 For an official signed release, Authenticode status must be `Valid`, and the SHA-256 value must match the checksum published with that exact release.

@@ -51,16 +51,16 @@ Do not store a PFX, certificate private key, SMTP password, or user data in GitH
 
 ## 4. Run a signed release candidate
 
-For application version `0.11.1`:
+For application version `0.12.0`:
 
 1. Confirm that normal `Windows CI` passed for the intended commit.
-2. Create and push the exact tag `windows-v0.11.1`.
+2. Create and push the exact tag `windows-v0.12.0`.
 3. In GitHub Actions open **Windows SignPath release candidate**.
-4. Select the `windows-v0.11.1` tag, then use **Run workflow**.
+4. Select the `windows-v0.12.0` tag, then use **Run workflow**.
 5. Approve both signing requests in SignPath if the policy requires approval.
 6. Download the `tabtome-signed-*` GitHub Actions artifact.
 7. Independently verify Authenticode status and compare SHA-256.
-8. Test install, settings, Firefox Native Messaging, a real EPUB delivery, update over the previous version, and uninstall on a clean Windows user/profile.
+8. Test install, settings, Firefox and Chrome Native Messaging, local EPUB saving, a real EPUB delivery, update over the previous version, and uninstall on a clean Windows user/profile.
 
 The workflow intentionally rejects branches and mismatched tags. It uploads a release candidate only as a time-limited Actions artifact. It does not create a GitHub Release, publish a website, push commits, or upload anything to AMO.
 

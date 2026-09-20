@@ -24,8 +24,8 @@
 
   <main>
     <h1>Privacy policy</h1>
-    <p class="updated">Last updated: August 18, 2026</p>
-    <p class="summary">TabTome processes pages and text you select to build an EPUB and deliver it to Kindle or PocketBook. The developer operates no processing server, receives no book content, and uses no analytics.</p>
+    <p class="updated">Last updated: September 20, 2026</p>
+    <p class="summary">TabTome processes pages and text you select to build an EPUB, save it on your computer, or deliver it to Kindle or PocketBook. The developer operates no processing server, receives no book content, and uses no analytics.</p>
 
     <div class="flow" aria-label="Data processing flow">
       Firefox → TabTome app on your computer → your SMTP provider → Amazon or PocketBook
@@ -36,6 +36,7 @@
       <li><strong>Selected pages:</strong> URLs, titles, extracted text, links, and selected images.</li>
       <li><strong>Pasted content:</strong> text, formatting, links, and images you explicitly paste into the extension.</li>
       <li><strong>Email settings:</strong> the sender address, Kindle and/or PocketBook addresses, the default recipient, and allowlist confirmations.</li>
+      <li><strong>Output mode and folder:</strong> whether to email the book, save the EPUB locally, or do both, plus the local folder configured for EPUB files.</li>
       <li><strong>Send metadata:</strong> a random job identifier, state, book title, article and image counts, EPUB size, selected recipient type, and short error messages.</li>
       <li><strong>SMTP password:</strong> entered directly in the Windows app. The Firefox extension never receives or transmits it.</li>
     </ul>
@@ -45,7 +46,8 @@
 
     <h2>Where data is sent</h2>
     <p>Prepared content moves from Firefox to the installed TabTome app through a local Native Messaging channel. Mozilla treats this as transmission outside the extension even though both parts run on the same computer.</p>
-    <p>The app builds the EPUB in memory and sends an email through the SMTP account you configure. The SMTP provider receives the addresses, subject, EPUB attachment, and ordinary mail-connection metadata. The selected Amazon Send to Kindle or Send-to-PocketBook service then receives the message. Their own terms and privacy policies govern their storage and processing.</p>
+    <p>When email delivery is selected, the app builds the EPUB in memory and sends an email through the SMTP account you configure. The SMTP provider receives the addresses, subject, EPUB attachment, and ordinary mail-connection metadata. The selected Amazon Send to Kindle or Send-to-PocketBook service then receives the message. Their own terms and privacy policies govern their storage and processing.</p>
+    <p>When local saving is selected, the app writes the EPUB to the configured folder on your computer and does not connect to SMTP for that book. The “email and save” mode performs both actions.</p>
     <p>When images are included, the browser may retrieve them from the source website. That server receives ordinary network request data. Images from an open page may use the current site session; images referenced by pasted HTML are fetched without cookies or HTTP authentication.</p>
 
     <h2>Data the developer does not receive</h2>
@@ -58,11 +60,11 @@
       <li>Email addresses and settings remain in <code>%LOCALAPPDATA%\PageToEreaderLocal</code> until the user changes or deletes them.</li>
       <li>The SMTP password remains in the same location in a file protected for the current Windows account with Windows DPAPI.</li>
       <li>Diagnostic logs are not intended to contain articles or passwords, and email addresses are redacted. The current log and one previous log, up to 5 MB each, remain until overwritten by rotation or deleted by the user.</li>
-      <li>The app does not keep the generated EPUB as a permanent local file. Copies held by the mail provider and e-reader service follow those services’ retention rules.</li>
+      <li>When saving is selected, the app writes the generated EPUB to the configured folder (by default <code>%USERPROFILE%\Downloads\TabTome</code>). The file remains on the computer until you delete it; the app does not upload this copy to the developer. Copies held by the mail provider and e-reader service follow those services’ retention rules.</li>
     </ul>
 
     <h2>Deleting data</h2>
-    <p>Remove the Firefox extension to delete its local settings. When uninstalling the Windows app, answer “Yes” when asked whether to remove user data. You can also delete <code>%LOCALAPPDATA%\PageToEreaderLocal</code> manually after closing Firefox and the app. Use the SMTP provider, Amazon, or PocketBook controls to delete copies held by those services.</p>
+    <p>Remove the Firefox or Chrome extension to delete its local settings. When uninstalling the Windows app, answer “Yes” when asked whether to remove user data. You can also delete <code>%LOCALAPPDATA%\PageToEreaderLocal</code> manually after closing the browser and app. Delete saved EPUB files with the normal Windows file controls from the selected folder. Use the SMTP provider, Amazon, or PocketBook controls to delete copies held by those services.</p>
 
     <h2>Security and limitations</h2>
     <p>Communication from Firefox is restricted to the extension ID. HTML is sanitized before EPUB creation, input sizes are limited, and the SMTP password is protected with Windows DPAPI. These measures do not protect against malware already running as the same Windows user or against compromise of the email account.</p>

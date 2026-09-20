@@ -33,7 +33,7 @@ Status: published on 2 September 2026 at `https://tab-tome.netlify.app/`. AMO ca
   Bilingual route recovery.
 ```
 
-The landing pages, localized help pages, language handoff, 404 page, privacy pages, shared styles, and three 1280×800 interface screenshots are published on Netlify. A public unsigned GitHub pre-release is available for SignPath review; AMO publication and a signed Windows release remain pending.
+The landing pages, localized help pages, language handoff, 404 page, privacy pages, shared styles, and three 1280×800 interface screenshots are published on Netlify. Firefox and Chrome/Chromium extension listings are public; the Windows installer is distributed as an unsigned preview through the direct Netlify download and GitHub Releases. Authenticode signing remains pending.
 
 Every localized page includes reciprocal absolute `hreflang` links, a visible language switcher that keeps the visitor on the equivalent route, and a canonical `https://tab-tome.netlify.app/` URL.
 
@@ -41,7 +41,7 @@ Every localized page includes reciprocal absolute `hreflang` links, a visible la
 
 ### 1. First viewport: what it does and what must be installed
 
-- One-sentence outcome: turn open browser pages or pasted material into an EPUB and send it to Kindle or PocketBook.
+- One-sentence outcome: turn open Firefox or Chrome/Chromium pages or pasted material into an EPUB, send it to Kindle or PocketBook, or save it locally.
 - Show the real mechanism as one readable queue: choose articles → build the EPUB locally → open it on the selected e-reader.
 - Primary action: install the supported Firefox extension.
 - Secondary action: download the required Windows companion.
@@ -69,7 +69,7 @@ Every localized page includes reciprocal absolute `hreflang` links, a visible la
 - Kindle and PocketBook targets.
 - Optional text-only mode.
 - Windows and Firefox supported.
-- Chrome/Chromium manual build marked experimental.
+- Firefox and Chrome/Chromium store packages; the Windows installer registers Native Messaging for both public extension IDs.
 - Unsupported browser pages, video, forms and source page styles are stated without concealment.
 
 ### 5. Installation path

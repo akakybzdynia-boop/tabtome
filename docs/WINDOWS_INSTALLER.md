@@ -28,7 +28,7 @@
 
 Путь `%LOCALAPPDATA%\PageToEreaderLocal` и технические ID Native Messaging сохраняют прежнее имя намеренно: это позволяет обновить существующую установку без потери адресов, DPAPI-пароля и связи с подписанным расширением. Inno Setup использует прежний `AppId`, поэтому обновление может сохранить старый каталог программы; чистая установка использует `%LOCALAPPDATA%\Programs\TabTome`.
 
-Firefox запускает `TabTomeHost.exe` по требованию. Launcher читает только абсолютные пути из `node-path.txt` и `data-root.txt`, запускает встроенный Node.js без консольного окна и передаёт Native Messaging stdio. Фоновый процесс между запросами не работает.
+Firefox и Chrome/Chromium запускают `TabTomeHost.exe` по требованию. Launcher читает только абсолютные пути из `node-path.txt` и `data-root.txt`, запускает встроенный Node.js без консольного окна и передаёт Native Messaging stdio. Фоновый процесс между запросами не работает.
 
 ## Первая установка и миграция
 
@@ -36,7 +36,10 @@ Firefox запускает `TabTomeHost.exe` по требованию. Launcher
 
 ```text
 HKEY_CURRENT_USER\Software\Mozilla\NativeMessagingHosts\page_to_ereader_local
+HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\page_to_ereader_local
 ```
+
+Firefox использует `allowed_extensions` для публичного AMO ID, а Chrome — отдельный manifest с точным `allowed_origins` для публичного Chrome Web Store ID `fmmlphejpodoaipafggdhgklelkkdleh`. Wildcard-origin не используется. Chromium-сборки с другим ID требуют отдельной записи host manifest.
 
 Если ключ уже указывает на ручную установку из папки проекта, до замены регистрации переносятся только отсутствующие пользовательские файлы:
 
@@ -75,8 +78,8 @@ npm.cmd run build:installer
 Результат:
 
 ```text
-outputs\TabTome-Setup-0.11.1.exe
-outputs\TabTome-Setup-0.11.1.exe.sha256
+outputs\TabTome-Setup-0.12.0.exe
+outputs\TabTome-Setup-0.12.0.exe.sha256
 ```
 
 `build-installer.ps1` подготавливает staging-каталог и вызывает `compile-installer.ps1`. Разделение нужно для облачной подписи: после первой сборки SignPath подписывает `TabTomeHost.exe` и `TabTomeSettings.exe`, скрипт `install-signed-binaries.ps1` возвращает их в staging-каталог, а `compile-installer.ps1` собирает вокруг них итоговый установщик. Затем сам установщик подписывается отдельным запросом.

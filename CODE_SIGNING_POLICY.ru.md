@@ -22,7 +22,7 @@
 
 1. Исходный код релиза фиксируется в публичном GitHub-репозитории.
 2. Обычный Windows CI собирает и проверяет код на GitHub-hosted Windows runner.
-3. Создаётся тег `windows-v<версия приложения>`, например `windows-v0.11.1`.
+3. Создаётся тег `windows-v<версия приложения>`, например `windows-v0.12.0`.
 4. Из этого тега вручную запускается workflow `Windows SignPath release candidate`.
 5. Workflow выполняет чистую сборку, все тесты и подготавливает установщик закреплёнными версиями Node.js и Inno Setup.
 6. SignPath подписывает приложение настроек и Native Messaging host.
@@ -48,8 +48,8 @@
 ## Проверка пользователем
 
 ```powershell
-Get-AuthenticodeSignature .\TabTome-Setup-0.11.1.exe | Format-List Status,StatusMessage,SignerCertificate
-Get-FileHash -Algorithm SHA256 .\TabTome-Setup-0.11.1.exe
+Get-AuthenticodeSignature .\TabTome-Setup-0.12.0.exe | Format-List Status,StatusMessage,SignerCertificate
+Get-FileHash -Algorithm SHA256 .\TabTome-Setup-0.12.0.exe
 ```
 
 У официального подписанного релиза статус должен быть `Valid`, а SHA-256 — совпадать с опубликованной контрольной суммой именно этого релиза.

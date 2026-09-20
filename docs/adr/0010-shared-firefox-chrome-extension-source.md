@@ -7,7 +7,7 @@
 
 Firefox and Chrome both support Manifest V3, but they describe the background process differently. Firefox uses `background.scripts` for this add-on, while Chrome requires `background.service_worker`. Firefox also requires Gecko-specific AMO metadata that Chrome must not receive. Runtime APIs are exposed as `browser.*` in Firefox and `chrome.*` in Chrome.
 
-Chrome Native Messaging authorization additionally requires a concrete Chrome extension origin. Its host manifest uses `allowed_origins` and Windows registration under `HKCU\Software\Google\Chrome\NativeMessagingHosts`. The existing Firefox host manifest instead uses `allowed_extensions` and a Mozilla extension ID. Wildcards are not allowed for Chrome origins, so a production Chrome registration cannot be finalized before the stable Chrome extension ID is known.
+Chrome Native Messaging authorization additionally requires a concrete Chrome extension origin. Its host manifest uses `allowed_origins` and Windows registration under `HKCU\Software\Google\Chrome\NativeMessagingHosts`. The Firefox host manifest instead uses `allowed_extensions` and a Mozilla extension ID. Wildcards are not allowed for Chrome origins.
 
 ## Decision
 
@@ -21,4 +21,4 @@ Native Messaging disconnect errors are read from both Firefox `Port.error` and C
 
 Both browser packages are reproducible from one source archive and are checked together. Firefox packaging and AMO metadata remain unchanged.
 
-The Chrome ZIP can be built and inspected now, but sending through the local component is not operational until the Windows installer writes a Chrome-specific host manifest containing the final Chrome extension ID. The Chrome package must not be described as fully installed or end-to-end tested before that registration and a real Chromium runtime test are completed.
+The public Chrome package is now published in the Chrome Web Store, and Windows installer 0.12.0 writes the Chrome-specific host manifest containing the final public extension ID. Local sending and EPUB saving are supported after installing the app and the public Chrome package. Chromium packages with another extension ID still require their own host registration and runtime test.
